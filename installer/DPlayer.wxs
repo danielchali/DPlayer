@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="DPlayer"
+           Manufacturer="DPlayer"
+           Version="1.0.0.0"
+           UpgradeCode="A1B2C3D4-E5F6-7890-ABCD-EF1234567891"
+           Scope="perUser">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of DPlayer is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Feature Id="MainFeature" Title="DPlayer" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="INSTALLFOLDER" Name="DPlayer" />
+    </StandardDirectory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="DPlayerExe" Guid="B2C3D4E5-F6A7-8901-BCDE-F12345678902">
+        <File Source="..\publish\DPlayer.exe" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

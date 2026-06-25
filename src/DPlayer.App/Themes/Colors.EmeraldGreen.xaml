@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Emerald Green Theme -->
+    <Color x:Key="AccentColor">#10B981</Color>
+    <Color x:Key="AccentLightColor">#6EE7B7</Color>
+    <Color x:Key="AccentDarkColor">#059669</Color>
+
+</ResourceDictionary>

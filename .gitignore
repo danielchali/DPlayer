@@ -1,0 +1,24 @@
+# Build output
+bin/
+obj/
+publish/
+output/
+
+# IDE
+.vs/
+*.user
+*.suo
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Logs and local data
+*.log
+
+# NuGet
+*.nupkg
+packages/
+
+# Test results
+TestResults/

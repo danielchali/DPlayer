@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>DPlayer.App</RootNamespace>
+    <AssemblyName>DPlayer</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PlatformTarget>x64</PlatformTarget>
+    <VlcWindowsX86Enabled>false</VlcWindowsX86Enabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DPlayer.Core\DPlayer.Core.csproj" />
+    <ProjectReference Include="..\DPlayer.Infrastructure\DPlayer.Infrastructure.csproj" />
+    <ProjectReference Include="..\DPlayer.Plugins\DPlayer.Plugins.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="LibVLCSharp.WPF" Version="3.9.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+  </ItemGroup>
+
+</Project>
