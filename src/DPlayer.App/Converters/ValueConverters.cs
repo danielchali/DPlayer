@@ -7,11 +7,31 @@ namespace DPlayer.App.Converters;
 
 public sealed class BoolToVisibilityConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
-        value is true ? Visibility.Visible : Visibility.Collapsed;
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var visible = value switch
+        {
+            bool b => b,
+            string s => s is { Length: > 0 } and not "No media loaded",
+            _ => value is not null and not false
+        };
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
-        value is Visibility.Visible;
+        if (IsInverse(parameter))
+            visible = !visible;
+
+        return visible ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var visible = value is Visibility.Visible;
+        if (IsInverse(parameter))
+            visible = !visible;
+        return visible;
+    }
+
+    private static bool IsInverse(object? parameter) =>
+        parameter is string s && s.Equals("inverse", StringComparison.OrdinalIgnoreCase);
 }
 
 public sealed class InverseBoolConverter : IValueConverter

@@ -51,7 +51,8 @@ public sealed class LibVlcMediaPlayerService : IMediaPlayerService, IDisposable
     public LibVlcMediaPlayerService(ILogger<LibVlcMediaPlayerService> logger)
     {
         _logger = logger;
-        LibVLCSharp.Shared.Core.Initialize();
+        var libVlcDir = Path.Combine(AppContext.BaseDirectory, "libvlc", "win-x64");
+        LibVLCSharp.Shared.Core.Initialize(libVlcDir);
 
         var options = new[]
         {

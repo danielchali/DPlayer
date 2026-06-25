@@ -65,9 +65,23 @@ if (-not $SkipBuild) {
   )
   if (-not $FrameworkDependent) {
     $publishArgs += "--self-contained"
+    $publishArgs += "-p:SelfContained=true"
   }
 
   dotnet @publishArgs
+}
+
+if (-not $FrameworkDependent) {
+  $runtimeConfigPath = Join-Path $publishDir "DPlayer.runtimeconfig.json"
+  if (-not (Test-Path (Join-Path $publishDir "coreclr.dll"))) {
+    Write-Error "Publish failed self-contained check: coreclr.dll missing from $publishDir"
+  }
+  if (Test-Path $runtimeConfigPath) {
+    $runtimeConfig = Get-Content $runtimeConfigPath -Raw | ConvertFrom-Json
+    if (-not $runtimeConfig.runtimeOptions.includedFrameworks) {
+      Write-Error "Publish is framework-dependent. Use build-installer.ps1 or omit -FrameworkDependent for offline distribution."
+    }
+  }
 }
 
 if (-not (Test-Path $publishDir)) {
@@ -103,6 +117,6 @@ Show-FolderBreakdown (Join-Path $vlcPath "plugins") "LibVLC plugin categories:" 
 
 $fileCount = (Get-ChildItem $publishDir -Recurse -File).Count
 Write-Host "`nFiles: $fileCount" -ForegroundColor DarkGray
-Write-Host "Next: compile installer/DPlayer.iss with Inno Setup" -ForegroundColor Green
+Write-Host "Next: .\build-installer.ps1  (or compile installer/DPlayer.iss in Inno Setup)" -ForegroundColor Green
 
 Pop-Location

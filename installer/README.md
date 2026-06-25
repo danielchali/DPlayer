@@ -2,7 +2,13 @@
 
 ## Prerequisites
 
-Build a self-contained publish for distribution (default, ~230 MB installed, works offline):
+Build the installer (publishes self-contained + compiles Inno Setup):
+
+```powershell
+.\build-installer.ps1
+```
+
+Or publish only:
 
 ```powershell
 .\publish.ps1
@@ -11,7 +17,7 @@ Build a self-contained publish for distribution (default, ~230 MB installed, wor
 For a smaller framework-dependent build (requires .NET 9 Desktop Runtime on target machines):
 
 ```powershell
-.\publish.ps1 -FrameworkDependent
+.\build-installer.ps1 -FrameworkDependent
 ```
 
 `publish.ps1` reports folder sizes and LibVLC savings from plugin excludes. Manual equivalent:

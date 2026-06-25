@@ -35,15 +35,4 @@
         <GradientStop Color="#0D1117" Offset="1"/>
     </LinearGradientBrush>
 
-    <CornerRadius x:Key="WindowCornerRadius">12</CornerRadius>
-    <CornerRadius x:Key="ControlCornerRadius">8</CornerRadius>
-    <CornerRadius x:Key="ButtonCornerRadius">6</CornerRadius>
-
-    <FontFamily x:Key="PrimaryFont">Segoe UI Variable Display, Segoe UI, sans-serif</FontFamily>
-    <FontFamily x:Key="MonoFont">Cascadia Code, Consolas, monospace</FontFamily>
-
-    <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="TitleBarHeight">40</sys:Double>
-    <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="ControlBarHeight">72</sys:Double>
-    <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="SidePanelWidth">320</sys:Double>
-
 </ResourceDictionary>

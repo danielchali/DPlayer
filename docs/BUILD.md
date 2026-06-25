@@ -60,9 +60,17 @@ dotnet publish src/DPlayer.App -c Release -r win-x64 --self-contained -p:Publish
 
 ### Installer
 
+```powershell
+.\build-installer.ps1
+```
+
+This publishes a self-contained build and compiles `installer/DPlayer.iss` in one step. Manual alternative:
+
 1. Run `.\publish.ps1` to build `publish/`
 2. Compile `installer/DPlayer.iss` with Inno Setup
 3. Distribute `output/DPlayer-Setup-1.0.0.exe`
+
+Uninstall any previous DPlayer build before installing a new one.
 
 ## Plugin Development
 

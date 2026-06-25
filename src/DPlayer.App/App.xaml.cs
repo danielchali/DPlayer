@@ -39,8 +39,9 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
+            var detail = ex.InnerException?.Message ?? ex.Message;
             MessageBox.Show(
-                $"DPlayer failed to start:\n\n{ex.Message}",
+                $"DPlayer failed to start:\n\n{detail}",
                 "DPlayer",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
@@ -50,6 +51,8 @@ public partial class App : Application
 
     private async Task StartAsync(StartupEventArgs e)
     {
+        Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
         var appData = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "DPlayer");

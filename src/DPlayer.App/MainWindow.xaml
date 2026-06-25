@@ -8,7 +8,7 @@
         Height="720" Width="1280"
         MinHeight="480" MinWidth="800"
         WindowStartupLocation="CenterScreen"
-        Icon="pack://application:,,,/Assets/dplayer.png"
+        Icon="pack://application:,,,/DPlayer;component/Assets/dplayer.png"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -18,7 +18,6 @@
 
     <Window.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
-        <conv:InverseBoolConverter x:Key="InverseBool"/>
         <conv:PlaybackStateToIconConverter x:Key="PlayIcon"/>
         <conv:TimeSpanToStringConverter x:Key="TimeFormat"/>
     </Window.Resources>
@@ -47,7 +46,8 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="12,0">
-                        <Ellipse Width="10" Height="10" Fill="{StaticResource AccentBrush}" Margin="0,0,8,0"/>
+                        <Image Source="pack://application:,,,/DPlayer;component/Assets/dplayer.png"
+                               Width="18" Height="18" Margin="0,0,8,0" Stretch="Uniform"/>
                         <TextBlock Text="DPlayer" FontWeight="SemiBold" FontSize="13"
                                    Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
@@ -126,7 +126,7 @@
 
                     <!-- Loading indicator -->
                     <Border Background="#60000000"
-                            Visibility="{Binding IsPlaying, Converter={StaticResource InverseBool}}">
+                            Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, ConverterParameter=inverse}">
                         <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="64"
                                    Foreground="#40FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"
                                    Visibility="{Binding CurrentFileName, Converter={StaticResource BoolToVis}, ConverterParameter=inverse}"/>
@@ -162,9 +162,9 @@
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="8">
                                 <Button Content="+" Style="{StaticResource AccentButtonStyle}"
                                         Command="{Binding CreatePlaylistCommand}" Margin="0,0,4,0" Padding="10,4"/>
-                                <Button Content="Add" Style="{StaticResource IconButtonStyle}"
+                                <Button Content="Add" Style="{StaticResource TextButtonStyle}"
                                         Command="{Binding AddFileCommand}" Width="Auto" Padding="8,4"/>
-                                <Button Content="Import" Style="{StaticResource IconButtonStyle}"
+                                <Button Content="Import" Style="{StaticResource TextButtonStyle}"
                                         Command="{Binding ImportPlaylistCommand}" Width="Auto" Padding="8,4"/>
                             </StackPanel>
 
@@ -201,7 +201,7 @@
                                    VerticalAlignment="Center" Margin="0,0,8,0" FontFamily="{StaticResource MonoFont}"/>
                         <Slider Grid.Column="1" Style="{StaticResource SeekSliderStyle}"
                                 Minimum="0" Maximum="{Binding Duration.TotalSeconds}"
-                                Value="{Binding Position.TotalSeconds, Mode=TwoWay}"
+                                Value="{Binding Position.TotalSeconds, Mode=OneWay}"
                                 ValueChanged="SeekSlider_ValueChanged"/>
                         <TextBlock Grid.Column="2" Text="{Binding Duration, Converter={StaticResource TimeFormat}}"
                                    Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"
@@ -251,7 +251,18 @@
                         <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Button Style="{StaticResource IconButtonStyle}"
                                     Command="{Binding ToggleShuffleCommand}" ToolTip="Shuffle">
-                                <TextBlock Text="&#xE8B1;" Opacity="{Binding IsShuffle, Converter={StaticResource BoolToVis}, FallbackValue=0.4}"/>
+                                <TextBlock Text="&#xE8B1;">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Opacity" Value="0.4"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsShuffle}" Value="True">
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </Button>
                             <Button Style="{StaticResource IconButtonStyle}"
                                     Command="{Binding ToggleLoopCommand}" ToolTip="Loop">
