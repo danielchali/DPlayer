@@ -15,10 +15,41 @@ public partial class App : Application
 
     public static IServiceProvider Services { get; private set; } = null!;
 
+    public App()
+    {
+        DispatcherUnhandledException += (_, e) =>
+        {
+            MessageBox.Show(
+                $"DPlayer encountered an error:\n\n{e.Exception.Message}",
+                "DPlayer",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            e.Handled = true;
+            Shutdown(-1);
+        };
+    }
+
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
+        try
+        {
+            await StartAsync(e);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"DPlayer failed to start:\n\n{ex.Message}",
+                "DPlayer",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            Shutdown(-1);
+        }
+    }
+
+    private async Task StartAsync(StartupEventArgs e)
+    {
         var appData = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "DPlayer");
@@ -42,6 +73,9 @@ public partial class App : Application
                 services.AddSingleton<LibraryViewModel>();
                 services.AddTransient<SubtitleSearchViewModel>();
                 services.AddSingleton<MainWindow>();
+                services.AddSingleton<PluginManager>(sp => new PluginManager(
+                    sp.GetRequiredService<ILogger<PluginManager>>(),
+                    pluginsPath));
             })
             .ConfigureLogging(logging =>
             {
@@ -79,6 +113,12 @@ public partial class App : Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
+        if (Services is null)
+        {
+            base.OnExit(e);
+            return;
+        }
+
         var settings = Services.GetRequiredService<Core.Interfaces.ISettingsService>();
         await settings.SaveAsync();
 

@@ -2,13 +2,13 @@
 
 ## Prerequisites
 
-Build a self-contained publish first:
+Build a self-contained publish for distribution (default, ~230 MB installed, works offline):
 
 ```powershell
 .\publish.ps1
 ```
 
-Or framework-dependent (smaller, requires .NET 9 Desktop Runtime on target machines):
+For a smaller framework-dependent build (requires .NET 9 Desktop Runtime on target machines):
 
 ```powershell
 .\publish.ps1 -FrameworkDependent
@@ -20,7 +20,7 @@ Or framework-dependent (smaller, requires .NET 9 Desktop Runtime on target machi
 dotnet publish src/DPlayer.App -c Release -r win-x64 --self-contained -p:PublishSingleFile=false -o publish
 ```
 
-Copy the `publish` folder contents to `installer/../publish/` (relative to the `.iss` file).
+The publish output lands in `publish/` (relative to the repo root, referenced by `DPlayer.iss`).
 
 ## Inno Setup (Recommended)
 

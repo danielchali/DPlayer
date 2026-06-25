@@ -36,29 +36,31 @@ Native LibVLC binaries are restored automatically via the `VideoLAN.LibVLC.Windo
 
 ## Deployment
 
-### Framework-dependent
-
-```powershell
-dotnet publish src/DPlayer.App -c Release -o ./publish
-```
-
-Requires .NET 9 Desktop Runtime on target machines.
-
-### Self-contained (recommended for distribution)
+### Self-contained (recommended for distribution / offline)
 
 ```powershell
 .\publish.ps1
 ```
 
-Reports publish folder sizes and LibVLC trim savings. Equivalent:
+Bundles the .NET 9 runtime (~230 MB installed). No prerequisites on target machines.
+
+### Framework-dependent (smaller)
 
 ```powershell
-dotnet publish src/DPlayer.App -c Release -r win-x64 --self-contained -o ./publish
+.\publish.ps1 -FrameworkDependent
+```
+
+~90–100 MB installed. Requires [.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0) on target machines.
+
+Equivalent:
+
+```powershell
+dotnet publish src/DPlayer.App -c Release -r win-x64 --self-contained -p:PublishSingleFile=false -o ./publish
 ```
 
 ### Installer
 
-1. Publish self-contained build to `publish/`
+1. Run `.\publish.ps1` to build `publish/`
 2. Compile `installer/DPlayer.iss` with Inno Setup
 3. Distribute `output/DPlayer-Setup-1.0.0.exe`
 

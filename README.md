@@ -73,8 +73,10 @@ dotnet run --project src/DPlayer.App
 ## Publish
 
 ```powershell
-dotnet publish src/DPlayer.App -c Release -r win-x64 --self-contained -o ./publish
+.\publish.ps1
 ```
+
+Self-contained for offline distribution (~230 MB installed). Use `.\publish.ps1 -FrameworkDependent` for a smaller build that requires the .NET 9 Desktop Runtime.
 
 ## Configuration
 

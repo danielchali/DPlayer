@@ -84,7 +84,12 @@ $vlcSaved = [Math]::Max(0, $fullVlcSize - $vlcSize)
 Write-Host "`n=== Publish size ===" -ForegroundColor Green
 Write-Host ("  Total:              {0}" -f (Format-Mb $total))
 Write-Host ("  LibVLC (trimmed):   {0}" -f (Format-Mb $vlcSize)) -ForegroundColor Cyan
-Write-Host ("  App + .NET runtime: {0}" -f (Format-Mb $appSize))
+if (-not $FrameworkDependent) {
+  Write-Host ("  App + .NET runtime: {0}" -f (Format-Mb $appSize))
+} else {
+  Write-Host ("  App only:           {0}" -f (Format-Mb $appSize)) -ForegroundColor Cyan
+  Write-Host "  Requires .NET 9 Desktop Runtime on target machines" -ForegroundColor DarkGray
+}
 
 if ($fullVlcSize -gt 0) {
   Write-Host "`n=== LibVLC comparison (x64 NuGet baseline vs publish) ===" -ForegroundColor Green

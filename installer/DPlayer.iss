@@ -21,6 +21,7 @@ Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=lowest
+ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 SetupIconFile=..\src\DPlayer.App\Assets\dplayer.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
@@ -52,9 +53,3 @@ Root: HKCU; Subkey: "Software\Classes\DPlayer.mkv\shell\open\command"; ValueType
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-
-[Code]
-function InitializeSetup(): Boolean;
-begin
-  Result := True;
-end;

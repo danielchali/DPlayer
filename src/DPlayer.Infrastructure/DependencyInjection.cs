@@ -2,7 +2,6 @@ using DPlayer.Core.Interfaces;
 using DPlayer.Infrastructure.Data;
 using DPlayer.Infrastructure.Playback;
 using DPlayer.Infrastructure.Subtitles;
-using DPlayer.Plugins;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -33,7 +32,6 @@ public static class DependencyInjection
         services.AddSingleton<ILibraryService, Services.LibraryService>();
         services.AddSingleton<ISubtitleService, SubtitleService>();
         services.AddSingleton<IUpdateService, Services.UpdateService>();
-        services.AddSingleton<PluginManager>();
 
         return services;
     }
