@@ -5,6 +5,18 @@
 Build a self-contained publish first:
 
 ```powershell
+.\publish.ps1
+```
+
+Or framework-dependent (smaller, requires .NET 9 Desktop Runtime on target machines):
+
+```powershell
+.\publish.ps1 -FrameworkDependent
+```
+
+`publish.ps1` reports folder sizes and LibVLC savings from plugin excludes. Manual equivalent:
+
+```powershell
 dotnet publish src/DPlayer.App -c Release -r win-x64 --self-contained -p:PublishSingleFile=false -o publish
 ```
 

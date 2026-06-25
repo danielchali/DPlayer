@@ -27,4 +27,9 @@
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
   </ItemGroup>
 
+  <!-- Playback-only: skip output, discovery, muxing, and scripting plugins -->
+  <ItemGroup>
+    <VlcWindowsX64ExcludeFiles Include="plugins\access_output\%2A;plugins\stream_out\%2A;plugins\visualization\%2A;plugins\services_discovery\%2A;plugins\mux\%2A;plugins\lua\%2A;lua\%2A%2A;plugins\d3d9\%2A" />
+  </ItemGroup>
+
 </Project>

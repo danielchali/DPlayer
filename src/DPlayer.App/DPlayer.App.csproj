@@ -10,9 +10,13 @@
     <AssemblyName>DPlayer</AssemblyName>
     <LangVersion>latest</LangVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\dplayer.ico</ApplicationIcon>
     <PlatformTarget>x64</PlatformTarget>
-    <VlcWindowsX86Enabled>false</VlcWindowsX86Enabled>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\dplayer.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DPlayer.Core\DPlayer.Core.csproj" />

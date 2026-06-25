@@ -47,6 +47,12 @@ Requires .NET 9 Desktop Runtime on target machines.
 ### Self-contained (recommended for distribution)
 
 ```powershell
+.\publish.ps1
+```
+
+Reports publish folder sizes and LibVLC trim savings. Equivalent:
+
+```powershell
 dotnet publish src/DPlayer.App -c Release -r win-x64 --self-contained -o ./publish
 ```
 

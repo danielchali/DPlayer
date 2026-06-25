@@ -22,6 +22,7 @@ SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64compatible
+SetupIconFile=..\src\DPlayer.App\Assets\dplayer.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Languages]

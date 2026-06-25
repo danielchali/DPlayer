@@ -1,5 +1,7 @@
 <Project>
   <PropertyGroup>
+    <!-- VideoLAN.LibVLC.Windows copies both archs for AnyCPU unless x86 is disabled -->
+    <VlcWindowsX86Enabled>false</VlcWindowsX86Enabled>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
