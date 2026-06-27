@@ -39,6 +39,8 @@ public sealed class LibVlcMediaPlayerService : IMediaPlayerService, IDisposable
     public IReadOnlyList<AudioTrackInfo> AudioTracks => _audioTracks;
     public int CurrentSubtitleTrack { get; set; } = -1;
     public int CurrentAudioTrack { get; set; }
+    public TimeSpan AudioDelay { get; set; }
+    public TimeSpan SubtitleDelay { get; set; }
     public VideoFilterSettings VideoFilters { get; set; } = new();
     public SubtitleStyle SubtitleStyle { get; set; } = new();
 
@@ -99,7 +101,8 @@ public sealed class LibVlcMediaPlayerService : IMediaPlayerService, IDisposable
             _currentMedia?.Dispose();
             _currentMedia = new VlcMedia(_libVlc, path, FromType.FromPath);
             ConfigureMedia(_currentMedia);
-            _player?.Play(_currentMedia);
+            if (_player is not null)
+                _player.Media = _currentMedia;
 
             CurrentMedia = new MediaItem
             {
@@ -120,7 +123,8 @@ public sealed class LibVlcMediaPlayerService : IMediaPlayerService, IDisposable
             _currentMedia?.Dispose();
             _currentMedia = new VlcMedia(_libVlc, url, FromType.FromLocation);
             ConfigureMedia(_currentMedia);
-            _player?.Play(_currentMedia);
+            if (_player is not null)
+                _player.Media = _currentMedia;
 
             CurrentMedia = new MediaItem
             {
@@ -170,6 +174,35 @@ public sealed class LibVlcMediaPlayerService : IMediaPlayerService, IDisposable
         RefreshTracks();
     }
 
+    public void SelectAudioTrack(int trackIndex)
+    {
+        if (_player is null) return;
+        CurrentAudioTrack = trackIndex;
+        InvokePlayerMember("SetAudioTrack", trackIndex);
+        SetPlayerProperty("AudioTrack", trackIndex);
+    }
+
+    public void SelectSubtitleTrack(int trackIndex)
+    {
+        if (_player is null) return;
+        CurrentSubtitleTrack = trackIndex;
+        InvokePlayerMember("SetSpu", trackIndex);
+        SetPlayerProperty("Spu", trackIndex);
+    }
+
+    public void ApplyAudioDelay()
+    {
+        if (_player is null) return;
+        SetPlayerProperty("AudioDelay", AudioDelay.Ticks / 10);
+    }
+
+    public void ApplySubtitleDelay()
+    {
+        if (_player is null) return;
+        SubtitleStyle.DelayMs = SubtitleDelay.TotalMilliseconds;
+        SetPlayerProperty("SpuDelay", SubtitleDelay.Ticks / 10);
+    }
+
     public void SetHardwareAcceleration(bool enabled)
     {
         _hardwareAcceleration = enabled;
@@ -215,6 +248,7 @@ public sealed class LibVlcMediaPlayerService : IMediaPlayerService, IDisposable
         _player.SetAdjustFloat(VideoAdjustOption.Saturation, (float)Math.Clamp(VideoFilters.Saturation, 0, 2));
         _player.SetAdjustFloat(VideoAdjustOption.Gamma, (float)Math.Clamp(VideoFilters.Gamma, 0, 2));
         _player.SetAdjustFloat(VideoAdjustOption.Hue, (float)VideoFilters.Hue);
+        SetPlayerProperty("AspectRatio", GetAspectRatioValue(VideoFilters.AspectRatio));
     }
 
     public void SetVolume()
@@ -274,6 +308,45 @@ public sealed class LibVlcMediaPlayerService : IMediaPlayerService, IDisposable
             }
         }
     }
+
+    private void InvokePlayerMember(string methodName, int value)
+    {
+        try
+        {
+            var method = _player?.GetType().GetMethod(methodName, [typeof(int)]);
+            method?.Invoke(_player, [value]);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "LibVLC player method {MethodName} was not applied", methodName);
+        }
+    }
+
+    private void SetPlayerProperty(string propertyName, object value)
+    {
+        try
+        {
+            var property = _player?.GetType().GetProperty(propertyName);
+            if (property is not { CanWrite: true }) return;
+
+            var converted = Convert.ChangeType(value, property.PropertyType);
+            property.SetValue(_player, converted);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "LibVLC player property {PropertyName} was not applied", propertyName);
+        }
+    }
+
+    private static string? GetAspectRatioValue(AspectRatioMode aspectRatio) => aspectRatio switch
+    {
+        AspectRatioMode.Ratio16x9 => "16:9",
+        AspectRatioMode.Ratio4x3 => "4:3",
+        AspectRatioMode.Ratio21x9 => "21:9",
+        AspectRatioMode.Stretch => null,
+        AspectRatioMode.Fill => null,
+        _ => null
+    };
 
     private void UpdatePosition()
     {

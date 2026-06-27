@@ -184,6 +184,28 @@ public sealed class PlaylistService : IPlaylistService
         PlaylistChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    public async Task ClearPlaylistAsync(Guid playlistId)
+    {
+        var entities = await _db.PlaylistItems
+            .Where(i => i.PlaylistId == playlistId)
+            .ToListAsync();
+
+        _db.PlaylistItems.RemoveRange(entities);
+        await _db.SaveChangesAsync();
+
+        var playlist = _playlists.FirstOrDefault(p => p.Id == playlistId);
+        if (playlist is not null)
+        {
+            playlist.Items.Clear();
+            playlist.ModifiedAt = DateTime.UtcNow;
+        }
+
+        if (ActivePlaylist?.Id == playlistId)
+            CurrentIndex = 0;
+
+        PlaylistChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     public void SetActivePlaylist(Guid playlistId)
     {
         ActivePlaylist = _playlists.FirstOrDefault(p => p.Id == playlistId);
@@ -275,6 +297,8 @@ public sealed class PlaylistService : IPlaylistService
             var entity = await _db.PlaylistItems.FindAsync(items[i].Id);
             if (entity is not null) entity.OrderIndex = i;
         }
+        playlist.Items = items;
+        playlist.ModifiedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         PlaylistChanged?.Invoke(this, EventArgs.Empty);
     }

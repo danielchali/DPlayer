@@ -193,9 +193,59 @@ public static class KeyboardShortcutHandler
             vm.StopCommand.Execute(null);
             return true;
         }
+        if (shortcuts.TryGetValue("FrameBack", out var frameBack) && key == frameBack)
+        {
+            vm.FrameBackCommand.Execute(null);
+            return true;
+        }
+        if (shortcuts.TryGetValue("FrameForward", out var frameForward) && key == frameForward)
+        {
+            vm.FrameForwardCommand.Execute(null);
+            return true;
+        }
+        if (shortcuts.TryGetValue("SpeedDown", out var speedDown) && key == speedDown)
+        {
+            vm.SpeedDownCommand.Execute(null);
+            return true;
+        }
+        if (shortcuts.TryGetValue("SpeedUp", out var speedUp) && key == speedUp)
+        {
+            vm.SpeedUpCommand.Execute(null);
+            return true;
+        }
         if (shortcuts.TryGetValue("Screenshot", out var ss) && key == ss)
         {
             vm.TakeScreenshotCommand.Execute(null);
+            return true;
+        }
+        if (shortcuts.TryGetValue("CycleAudioTrack", out var audioTrack) && key == audioTrack)
+        {
+            vm.CycleAudioTrackCommand.Execute(null);
+            return true;
+        }
+        if (shortcuts.TryGetValue("CycleSubtitleTrack", out var subtitleTrack) && key == subtitleTrack)
+        {
+            vm.CycleSubtitleTrackCommand.Execute(null);
+            return true;
+        }
+        if (shortcuts.TryGetValue("AudioDelayDown", out var audioDelayDown) && key == audioDelayDown)
+        {
+            vm.AdjustAudioDelayCommand.Execute("-50");
+            return true;
+        }
+        if (shortcuts.TryGetValue("AudioDelayUp", out var audioDelayUp) && key == audioDelayUp)
+        {
+            vm.AdjustAudioDelayCommand.Execute("50");
+            return true;
+        }
+        if (shortcuts.TryGetValue("SubtitleDelayDown", out var subtitleDelayDown) && key == subtitleDelayDown)
+        {
+            vm.AdjustSubtitleDelayCommand.Execute("-50");
+            return true;
+        }
+        if (shortcuts.TryGetValue("SubtitleDelayUp", out var subtitleDelayUp) && key == subtitleDelayUp)
+        {
+            vm.AdjustSubtitleDelayCommand.Execute("50");
             return true;
         }
         if (shortcuts.TryGetValue("TogglePlaylist", out var pl) && key == pl)

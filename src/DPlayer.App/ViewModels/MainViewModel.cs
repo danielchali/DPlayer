@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
+using System.Text;
 using DPlayer.Core.Enums;
 using DPlayer.Core.Interfaces;
 using DPlayer.Core.Models;
@@ -40,9 +42,16 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private double _saturation = 1.0;
     [ObservableProperty] private AspectRatioMode _aspectRatio = AspectRatioMode.Auto;
     [ObservableProperty] private VideoRotation _rotation = VideoRotation.None;
+    [ObservableProperty] private ObservableCollection<AudioTrack> _audioTracks = [];
+    [ObservableProperty] private ObservableCollection<SubtitleTrack> _subtitleTracks = [];
+    [ObservableProperty] private string _selectedAudioTrackText = "Audio";
+    [ObservableProperty] private string _selectedSubtitleTrackText = "Subtitles";
+    [ObservableProperty] private string _osdText = string.Empty;
+    [ObservableProperty] private bool _isOsdVisible;
 
   public static readonly double[] SpeedOptions = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 4.0];
     private int _speedIndex = 3;
+    private CancellationTokenSource? _osdCts;
 
     public PlaylistViewModel PlaylistVm { get; }
     public SubtitleViewModel SubtitleVm { get; }
@@ -79,13 +88,18 @@ public partial class MainViewModel : ObservableObject
         {
             PlaybackState = state;
             IsPlaying = state == PlaybackState.Playing;
+            if (state == PlaybackState.Playing)
+                RefreshTrackLists();
         };
         _player.PositionChanged += (_, pos) => Position = pos;
         _player.DurationChanged += (_, dur) => Duration = dur;
         _player.MediaEnded += async (_, _) =>
         {
             if (_playlist.ActivePlaylist is not null)
+            {
                 await _playlist.PlayNextAsync(_player);
+                UpdateCurrentMediaUi();
+            }
         };
         _player.ErrorOccurred += (_, msg) => _dialogs.ShowMessage("Playback Error", msg);
     }
@@ -116,16 +130,20 @@ public partial class MainViewModel : ObservableObject
             _player.Volume = Volume;
             _player.PlaybackSpeed = PlaybackSpeed;
             _player.Play();
+            RefreshTrackLists();
 
             CurrentFileName = Path.GetFileName(path);
-            Title = $"DPlayer — {CurrentFileName}";
+            Title = $"DPlayer - {CurrentFileName}";
 
             if (_settings.Settings.AutoDownloadSubtitles)
             {
                 var subPath = await _subtitles.AutoDetectAndDownloadAsync(
                     path, _settings.Settings.DefaultSubtitleLanguage);
                 if (subPath is not null)
+                {
                     await _player.LoadSubtitleAsync(subPath);
+                    RefreshTrackLists();
+                }
             }
         }
         catch (Exception ex)
@@ -145,28 +163,60 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void TogglePlayPause() => _player.TogglePlayPause();
+    private void TogglePlayPause()
+    {
+        _player.TogglePlayPause();
+        ShowOsd(IsPlaying ? "Pause" : "Play");
+    }
 
     [RelayCommand]
-    private void Stop() => _player.Stop();
+    private void Stop()
+    {
+        _player.Stop();
+        ShowOsd("Stop");
+    }
 
     [RelayCommand]
-    private async Task PlayNext() => await _playlist.PlayNextAsync(_player);
+    private async Task PlayNext()
+    {
+        await _playlist.PlayNextAsync(_player);
+        UpdateCurrentMediaUi();
+    }
 
     [RelayCommand]
-    private async Task PlayPrevious() => await _playlist.PlayPreviousAsync(_player);
+    private async Task PlayPrevious()
+    {
+        await _playlist.PlayPreviousAsync(_player);
+        UpdateCurrentMediaUi();
+    }
 
     [RelayCommand]
-    private void SeekForward() => _player.SeekRelative(TimeSpan.FromSeconds(10));
+    private void SeekForward()
+    {
+        _player.SeekRelative(TimeSpan.FromSeconds(10));
+        ShowOsd($"+10s  {FormatTime(_player.Position)}");
+    }
 
     [RelayCommand]
-    private void SeekBackward() => _player.SeekRelative(TimeSpan.FromSeconds(-10));
+    private void SeekBackward()
+    {
+        _player.SeekRelative(TimeSpan.FromSeconds(-10));
+        ShowOsd($"-10s  {FormatTime(_player.Position)}");
+    }
 
     [RelayCommand]
-    private void FastForward() => _player.SeekRelative(TimeSpan.FromSeconds(30));
+    private void FastForward()
+    {
+        _player.SeekRelative(TimeSpan.FromSeconds(30));
+        ShowOsd($"+30s  {FormatTime(_player.Position)}");
+    }
 
     [RelayCommand]
-    private void Rewind() => _player.SeekRelative(TimeSpan.FromSeconds(-30));
+    private void Rewind()
+    {
+        _player.SeekRelative(TimeSpan.FromSeconds(-30));
+        ShowOsd($"-30s  {FormatTime(_player.Position)}");
+    }
 
     [RelayCommand]
     private void FrameForward() => _player.FrameStep(true);
@@ -175,13 +225,35 @@ public partial class MainViewModel : ObservableObject
     private void FrameBack() => _player.FrameStep(false);
 
     [RelayCommand]
-    private void SeekToPosition(double seconds) => _player.Seek(TimeSpan.FromSeconds(seconds));
+    private void SpeedUp()
+    {
+        var next = SpeedOptions.FirstOrDefault(s => s > PlaybackSpeed);
+        if (next <= 0) next = SpeedOptions[^1];
+        SetPlaybackSpeed(next);
+    }
+
+    [RelayCommand]
+    private void SpeedDown()
+    {
+        var next = SpeedOptions.LastOrDefault(s => s < PlaybackSpeed);
+        if (next <= 0) next = SpeedOptions[0];
+        SetPlaybackSpeed(next);
+    }
+
+    [RelayCommand]
+    private void SeekToPosition(double seconds)
+    {
+        var position = TimeSpan.FromSeconds(seconds);
+        _player.Seek(position);
+        ShowOsd(FormatTime(position));
+    }
 
     partial void OnVolumeChanged(double value)
     {
         _player.Volume = value;
         if (_player is Infrastructure.Playback.LibVlcMediaPlayerService vlc)
             vlc.SetVolume();
+        ShowOsd($"Volume {value:0}%");
     }
 
     partial void OnIsMutedChanged(bool value)
@@ -189,6 +261,7 @@ public partial class MainViewModel : ObservableObject
         _player.IsMuted = value;
         if (_player is Infrastructure.Playback.LibVlcMediaPlayerService vlc)
             vlc.SetVolume();
+        ShowOsd(value ? "Muted" : $"Volume {Volume:0}%");
     }
 
     [RelayCommand]
@@ -212,6 +285,7 @@ public partial class MainViewModel : ObservableObject
         _player.PlaybackSpeed = PlaybackSpeed;
         if (_player is Infrastructure.Playback.LibVlcMediaPlayerService vlc)
             vlc.SetPlaybackRate();
+        ShowOsd($"Speed {PlaybackSpeedText}");
     }
 
     [RelayCommand]
@@ -222,6 +296,7 @@ public partial class MainViewModel : ObservableObject
         _player.PlaybackSpeed = speed;
         if (_player is Infrastructure.Playback.LibVlcMediaPlayerService vlc)
             vlc.SetPlaybackRate();
+        ShowOsd($"Speed {PlaybackSpeedText}");
     }
 
     [RelayCommand]
@@ -229,6 +304,7 @@ public partial class MainViewModel : ObservableObject
     {
         IsShuffle = !IsShuffle;
         _playlist.Shuffle = IsShuffle;
+        ShowOsd(IsShuffle ? "Shuffle on" : "Shuffle off");
     }
 
     [RelayCommand]
@@ -237,6 +313,7 @@ public partial class MainViewModel : ObservableObject
         IsLooping = !IsLooping;
         _player.LoopMode = IsLooping ? LoopMode.Single : LoopMode.None;
         _playlist.LoopMode = IsLooping ? LoopMode.Playlist : LoopMode.None;
+        ShowOsd(IsLooping ? "Loop on" : "Loop off");
     }
 
     [RelayCommand]
@@ -249,7 +326,11 @@ public partial class MainViewModel : ObservableObject
     private void ClearAbRepeat() => _player.ClearAbRepeat();
 
     [RelayCommand]
-    private void ToggleFullscreen() => IsFullscreen = !IsFullscreen;
+    private void ToggleFullscreen()
+    {
+        IsFullscreen = !IsFullscreen;
+        ShowOsd(IsFullscreen ? "Fullscreen" : "Windowed");
+    }
 
     [RelayCommand]
     private void TogglePlaylistPanel() => IsPlaylistPanelOpen = !IsPlaylistPanelOpen;
@@ -265,7 +346,113 @@ public partial class MainViewModel : ObservableObject
     {
         var path = await _dialogs.OpenFileAsync(_files.GetSubtitleFilter());
         if (path is not null)
+        {
             await _player.LoadSubtitleAsync(path);
+            RefreshTrackLists();
+            ShowOsd($"Subtitle loaded: {Path.GetFileName(path)}");
+        }
+    }
+
+    [RelayCommand]
+    private void CycleAudioTrack()
+    {
+        RefreshTrackLists();
+        if (AudioTracks.Count == 0)
+        {
+            ShowOsd("No audio tracks");
+            return;
+        }
+
+        var index = AudioTracks.ToList().FindIndex(t => t.Index == _player.CurrentAudioTrack);
+        var next = AudioTracks[(index + 1 + AudioTracks.Count) % AudioTracks.Count];
+        SelectAudioTrack(next.Index);
+    }
+
+    [RelayCommand]
+    private void CycleSubtitleTrack()
+    {
+        RefreshTrackLists();
+        if (SubtitleTracks.Count == 0)
+        {
+            ShowOsd("No subtitle tracks");
+            return;
+        }
+
+        var index = SubtitleTracks.ToList().FindIndex(t => t.Index == _player.CurrentSubtitleTrack);
+        var next = SubtitleTracks[(index + 1 + SubtitleTracks.Count) % SubtitleTracks.Count];
+        SelectSubtitleTrack(next.Index);
+    }
+
+    [RelayCommand]
+    private void SelectAudioTrack(object? parameter)
+    {
+        if (!TryGetTrackIndex(parameter, out var trackIndex)) return;
+        _player.SelectAudioTrack(trackIndex);
+        RefreshTrackLists();
+        ShowOsd($"Audio: {SelectedAudioTrackText}");
+    }
+
+    [RelayCommand]
+    private void SelectSubtitleTrack(object? parameter)
+    {
+        if (!TryGetTrackIndex(parameter, out var trackIndex)) return;
+        _player.SelectSubtitleTrack(trackIndex);
+        RefreshTrackLists();
+        ShowOsd($"Subtitle: {SelectedSubtitleTrackText}");
+    }
+
+    [RelayCommand]
+    private void AdjustAudioDelay(string milliseconds)
+    {
+        if (!double.TryParse(milliseconds, out var value)) return;
+        _player.AudioDelay += TimeSpan.FromMilliseconds(value);
+        _player.ApplyAudioDelay();
+        ShowOsd($"Audio delay {FormatSignedMilliseconds(_player.AudioDelay)}");
+    }
+
+    [RelayCommand]
+    private void AdjustSubtitleDelay(string milliseconds)
+    {
+        if (!double.TryParse(milliseconds, out var value)) return;
+        _player.SubtitleDelay += TimeSpan.FromMilliseconds(value);
+        _player.ApplySubtitleDelay();
+        ShowOsd($"Subtitle delay {FormatSignedMilliseconds(_player.SubtitleDelay)}");
+    }
+
+    [RelayCommand]
+    private void ResetAvSync()
+    {
+        _player.AudioDelay = TimeSpan.Zero;
+        _player.SubtitleDelay = TimeSpan.Zero;
+        _player.ApplyAudioDelay();
+        _player.ApplySubtitleDelay();
+        ShowOsd("A/V sync reset");
+    }
+
+    [RelayCommand]
+    private void ShowMediaInfo()
+    {
+        var media = _player.CurrentMedia;
+        if (media is null)
+        {
+            _dialogs.ShowMessage("Media Info", "No media loaded.");
+            return;
+        }
+
+        var info = new FileInfo(media.FilePath);
+        var text = new StringBuilder()
+            .AppendLine($"Title: {media.Title}")
+            .AppendLine($"Path: {media.FilePath}")
+            .AppendLine($"Type: {media.Type}")
+            .AppendLine($"Duration: {FormatTime(Duration)}")
+            .AppendLine($"Size: {FormatBytes(info.Exists ? info.Length : media.FileSizeBytes)}")
+            .AppendLine($"Audio tracks: {_player.AudioTracks.Count}")
+            .AppendLine($"Subtitle tracks: {_player.SubtitleTracks.Count}")
+            .AppendLine($"Playback speed: {PlaybackSpeedText}")
+            .AppendLine($"Volume: {Volume:0}%")
+            .ToString();
+
+        _dialogs.ShowMessage("Media Info", text);
     }
 
     [RelayCommand]
@@ -280,6 +467,14 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenSettings() => _dialogs.ShowSettingsWindow();
+
+    [RelayCommand]
+    private void SetAspectRatio(string mode)
+    {
+        if (!Enum.TryParse<AspectRatioMode>(mode, out var aspectRatio)) return;
+        AspectRatio = aspectRatio;
+        ShowOsd($"Aspect ratio {GetAspectRatioLabel(aspectRatio)}");
+    }
 
     [RelayCommand]
     private async Task HandleFileDrop(string[] files)
@@ -314,11 +509,97 @@ public partial class MainViewModel : ObservableObject
         };
         if (_player is Infrastructure.Playback.LibVlcMediaPlayerService vlc)
             vlc.ApplyVideoFilters();
+        ShowOsd("Video settings applied");
     }
 
     public async Task SavePositionAsync()
     {
         if (_player.CurrentMedia is not null && Position > TimeSpan.Zero)
             await _library.SavePlaybackPositionAsync(_player.CurrentMedia.FilePath, Position);
+    }
+
+    private void RefreshTrackLists()
+    {
+        AudioTracks = new ObservableCollection<AudioTrack>(_player.AudioTracks);
+        SubtitleTracks = new ObservableCollection<SubtitleTrack>(_player.SubtitleTracks);
+        SelectedAudioTrackText = AudioTracks.FirstOrDefault(t => t.Index == _player.CurrentAudioTrack)?.Label ?? "Audio";
+        SelectedSubtitleTrackText = _player.CurrentSubtitleTrack < 0
+            ? "Subtitles off"
+            : SubtitleTracks.FirstOrDefault(t => t.Index == _player.CurrentSubtitleTrack)?.Label ?? "Subtitles";
+    }
+
+    private void UpdateCurrentMediaUi()
+    {
+        if (_player.CurrentMedia is null) return;
+        CurrentFileName = Path.GetFileName(_player.CurrentMedia.FilePath);
+        Title = $"DPlayer - {CurrentFileName}";
+        RefreshTrackLists();
+    }
+
+    private async void ShowOsd(string message)
+    {
+        _osdCts?.Cancel();
+        var cts = new CancellationTokenSource();
+        _osdCts = cts;
+        OsdText = message;
+        IsOsdVisible = true;
+
+        try
+        {
+            await Task.Delay(1400, cts.Token);
+            if (!cts.IsCancellationRequested)
+                IsOsdVisible = false;
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
+
+    private static string FormatTime(TimeSpan value) =>
+        value.TotalHours >= 1 ? value.ToString(@"h\:mm\:ss") : value.ToString(@"mm\:ss");
+
+    private static string FormatSignedMilliseconds(TimeSpan value) =>
+        $"{(value >= TimeSpan.Zero ? "+" : "-")}{Math.Abs(value.TotalMilliseconds):0} ms";
+
+    private static string GetAspectRatioLabel(AspectRatioMode aspectRatio) => aspectRatio switch
+    {
+        AspectRatioMode.Ratio16x9 => "16:9",
+        AspectRatioMode.Ratio4x3 => "4:3",
+        AspectRatioMode.Ratio21x9 => "21:9",
+        AspectRatioMode.Fill => "Fill",
+        AspectRatioMode.Stretch => "Stretch",
+        _ => "Auto"
+    };
+
+    private static bool TryGetTrackIndex(object? value, out int index)
+    {
+        switch (value)
+        {
+            case int i:
+                index = i;
+                return true;
+            case long l:
+                index = (int)l;
+                return true;
+            case string s when int.TryParse(s, out var parsed):
+                index = parsed;
+                return true;
+            default:
+                index = 0;
+                return false;
+        }
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        string[] units = ["B", "KB", "MB", "GB", "TB"];
+        var value = (double)bytes;
+        var unit = 0;
+        while (value >= 1024 && unit < units.Length - 1)
+        {
+            value /= 1024;
+            unit++;
+        }
+        return $"{value:0.##} {units[unit]}";
     }
 }

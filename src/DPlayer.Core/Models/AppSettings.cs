@@ -54,6 +54,12 @@ public static class DefaultShortcuts
         ["FrameForward"] = "Period",
         ["SpeedDown"] = "BracketLeft",
         ["SpeedUp"] = "BracketRight",
+        ["CycleAudioTrack"] = "A",
+        ["CycleSubtitleTrack"] = "T",
+        ["AudioDelayDown"] = "J",
+        ["AudioDelayUp"] = "K",
+        ["SubtitleDelayDown"] = "G",
+        ["SubtitleDelayUp"] = "H",
         ["Screenshot"] = "Ctrl+Shift+S",
         ["TogglePlaylist"] = "L",
         ["AbRepeat"] = "R"

@@ -63,6 +63,34 @@ public partial class PlaylistViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ClearPlaylist()
+    {
+        if (SelectedPlaylist is null || SelectedPlaylist.Items.Count == 0) return;
+        if (await _dialogs.ConfirmAsync("Clear Playlist", $"Remove all items from '{SelectedPlaylist.Name}'?"))
+            await _playlist.ClearPlaylistAsync(SelectedPlaylist.Id);
+    }
+
+    [RelayCommand]
+    private async Task MoveSelectedUp()
+    {
+        if (SelectedPlaylist is null || SelectedEntry is null) return;
+        var ordered = SelectedPlaylist.Items.OrderBy(i => i.OrderIndex).ToList();
+        var index = ordered.FindIndex(i => i.Id == SelectedEntry.Id);
+        if (index <= 0) return;
+        await _playlist.ReorderAsync(SelectedPlaylist.Id, index, index - 1);
+    }
+
+    [RelayCommand]
+    private async Task MoveSelectedDown()
+    {
+        if (SelectedPlaylist is null || SelectedEntry is null) return;
+        var ordered = SelectedPlaylist.Items.OrderBy(i => i.OrderIndex).ToList();
+        var index = ordered.FindIndex(i => i.Id == SelectedEntry.Id);
+        if (index < 0 || index >= ordered.Count - 1) return;
+        await _playlist.ReorderAsync(SelectedPlaylist.Id, index, index + 1);
+    }
+
+    [RelayCommand]
     private async Task ImportPlaylist()
     {
         var path = await _dialogs.OpenFileAsync("Playlist Files|*.m3u;*.m3u8;*.pls|All Files|*.*");

@@ -19,6 +19,8 @@ public interface IMediaPlayerService
     IReadOnlyList<AudioTrack> AudioTracks { get; }
     int CurrentSubtitleTrack { get; set; }
     int CurrentAudioTrack { get; set; }
+    TimeSpan AudioDelay { get; set; }
+    TimeSpan SubtitleDelay { get; set; }
     VideoFilterSettings VideoFilters { get; set; }
     SubtitleStyle SubtitleStyle { get; set; }
 
@@ -41,6 +43,10 @@ public interface IMediaPlayerService
     void SetAbPointB();
     void ClearAbRepeat();
     Task LoadSubtitleAsync(string path);
+    void SelectAudioTrack(int trackIndex);
+    void SelectSubtitleTrack(int trackIndex);
+    void ApplyAudioDelay();
+    void ApplySubtitleDelay();
     void SetHardwareAcceleration(bool enabled);
     Task<byte[]?> TakeScreenshotAsync();
     void ApplyEqualizer(IReadOnlyList<EqualizerBand> bands);
@@ -63,6 +69,7 @@ public interface IPlaylistService
     Task DeletePlaylistAsync(Guid id);
     Task AddToPlaylistAsync(Guid playlistId, string filePath, string title);
     Task RemoveFromPlaylistAsync(Guid playlistId, Guid entryId);
+    Task ClearPlaylistAsync(Guid playlistId);
     void SetActivePlaylist(Guid playlistId);
     Task PlayNextAsync(IMediaPlayerService player);
     Task PlayPreviousAsync(IMediaPlayerService player);

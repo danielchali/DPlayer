@@ -16,6 +16,8 @@ public partial class MainWindow : Window
     private readonly ISettingsService _settings;
     private readonly DispatcherTimer _hideControlsTimer;
     private MediaPlayer? _mediaPlayer;
+    private bool _isSeekingWithSlider;
+    private WindowState _windowStateBeforeFullscreen = WindowState.Normal;
 
     public MainWindow(MainViewModel viewModel, ISettingsService settings)
     {
@@ -39,8 +41,7 @@ public partial class MainWindow : Window
         {
             if (e.PropertyName == nameof(MainViewModel.IsFullscreen))
             {
-                WindowStyle = _viewModel.IsFullscreen ? WindowStyle.None : WindowStyle.None;
-                WindowState = _viewModel.IsFullscreen ? WindowState.Maximized : WindowState.Normal;
+                ApplyFullscreenState();
             }
         };
     }
@@ -48,6 +49,7 @@ public partial class MainWindow : Window
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         WindowHelper.EnableMica(this);
+        UpdateWindowChromeState();
 
         if (App.Services.GetRequiredService<IMediaPlayerService>() is LibVlcMediaPlayerService playerService)
         {
@@ -63,6 +65,9 @@ public partial class MainWindow : Window
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (_viewModel.IsFullscreen)
+            return;
+
         if (e.ClickCount == 2)
             WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
         else
@@ -118,8 +123,23 @@ public partial class MainWindow : Window
 
     private void SeekSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (!IsLoaded) return;
+        if (!IsLoaded || !_isSeekingWithSlider) return;
         _viewModel.SeekToPositionCommand.Execute(e.NewValue);
+    }
+
+    private void SeekSlider_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) =>
+        _isSeekingWithSlider = true;
+
+    private void SeekSlider_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        _isSeekingWithSlider = false;
+        _viewModel.SeekToPositionCommand.Execute(((System.Windows.Controls.Slider)sender).Value);
+    }
+
+    private void SeekSlider_PreviewKeyUp(object sender, KeyEventArgs e)
+    {
+        if (e.Key is Key.Left or Key.Right or Key.Home or Key.End or Key.PageDown or Key.PageUp)
+            _viewModel.SeekToPositionCommand.Execute(((System.Windows.Controls.Slider)sender).Value);
     }
 
     private void SpeedText_Click(object sender, MouseButtonEventArgs e) =>
@@ -146,5 +166,48 @@ public partial class MainWindow : Window
             var files = (string[])e.Data.GetData(DataFormats.FileDrop)!;
             await _viewModel.HandleFileDropCommand.ExecuteAsync(files);
         }
+    }
+
+    private void Window_StateChanged(object? sender, EventArgs e) => UpdateWindowChromeState();
+
+    private void ApplyFullscreenState()
+    {
+        if (_viewModel.IsFullscreen)
+        {
+            _windowStateBeforeFullscreen = WindowState == WindowState.Minimized ? WindowState.Normal : WindowState;
+            WindowState = WindowState.Normal;
+            ResizeMode = ResizeMode.NoResize;
+            Topmost = true;
+            WindowState = WindowState.Maximized;
+        }
+        else
+        {
+            Topmost = false;
+            ResizeMode = ResizeMode.CanResize;
+            WindowState = _windowStateBeforeFullscreen;
+        }
+
+        UpdateWindowChromeState();
+    }
+
+    private void UpdateWindowChromeState()
+    {
+        if (!IsLoaded)
+            return;
+
+        var isFullscreen = _viewModel.IsFullscreen;
+        var isMaximized = WindowState == WindowState.Maximized;
+        TitleBarRow.Height = isFullscreen
+            ? new GridLength(0)
+            : (GridLength)FindResource("TitleBarHeight");
+        TitleBar.Visibility = isFullscreen ? Visibility.Collapsed : Visibility.Visible;
+        RootBorder.CornerRadius = isFullscreen || isMaximized
+            ? new CornerRadius(0)
+            : (CornerRadius)FindResource("WindowCornerRadius");
+        RootBorder.BorderThickness = isFullscreen ? new Thickness(0) : new Thickness(1);
+        MaximizeButton.Content = isMaximized ? "\uE923" : "\uE922";
+        MaximizeButton.ToolTip = isMaximized ? "Restore" : "Maximize";
+        FullscreenButton.Content = isFullscreen ? "\uE73F" : "\uE740";
+        FullscreenButton.ToolTip = isFullscreen ? "Exit Fullscreen (F)" : "Fullscreen (F)";
     }
 }
