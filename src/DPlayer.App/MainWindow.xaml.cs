@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using DPlayer.App.Services;
 using DPlayer.App.ViewModels;
@@ -18,6 +19,9 @@ public partial class MainWindow : Window
     private MediaPlayer? _mediaPlayer;
     private bool _isSeekingWithSlider;
     private WindowState _windowStateBeforeFullscreen = WindowState.Normal;
+    private WindowStyle _windowStyleBeforeFullscreen = WindowStyle.None;
+    private ResizeMode _resizeModeBeforeFullscreen = ResizeMode.CanResize;
+    private bool _topmostBeforeFullscreen;
 
     public MainWindow(MainViewModel viewModel, ISettingsService settings)
     {
@@ -55,6 +59,7 @@ public partial class MainWindow : Window
         {
             _mediaPlayer = playerService.CreateAndAttachPlayer();
             VideoView.MediaPlayer = _mediaPlayer;
+            SetNativeVideoHostBackgroundToBlack();
         }
     }
 
@@ -88,6 +93,15 @@ public partial class MainWindow : Window
 
         button.ContextMenu.PlacementTarget = button;
         button.ContextMenu.IsOpen = true;
+    }
+
+    private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape && _viewModel.IsFullscreen)
+        {
+            _viewModel.ToggleFullscreenCommand.Execute(null);
+            e.Handled = true;
+        }
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -125,9 +139,29 @@ public partial class MainWindow : Window
     private void VideoArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ClickCount == 2)
+        {
             _viewModel.ToggleFullscreenCommand.Execute(null);
+            e.Handled = true;
+        }
         else
+        {
             _viewModel.TogglePlayPauseCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
+
+    private void VideoView_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        VideoArea_MouseLeftButtonDown(sender, e);
+    }
+
+    private void Window_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2 && IsMouseOverVideoArea(e))
+        {
+            _viewModel.ToggleFullscreenCommand.Execute(null);
+            e.Handled = true;
+        }
     }
 
     private void SeekSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -196,20 +230,26 @@ public partial class MainWindow : Window
         if (_viewModel.IsFullscreen)
         {
             _windowStateBeforeFullscreen = WindowState == WindowState.Minimized ? WindowState.Normal : WindowState;
+            _windowStyleBeforeFullscreen = WindowStyle;
+            _resizeModeBeforeFullscreen = ResizeMode;
+            _topmostBeforeFullscreen = Topmost;
             _viewModel.IsPlaylistPanelOpen = false;
             _viewModel.IsLibraryPanelOpen = false;
             _viewModel.IsControlsVisible = false;
             _hideControlsTimer.Stop();
             WindowState = WindowState.Normal;
+            WindowStyle = WindowStyle.None;
             ResizeMode = ResizeMode.NoResize;
             Topmost = true;
             WindowState = WindowState.Maximized;
         }
         else
         {
-            Topmost = false;
-            ResizeMode = ResizeMode.CanResize;
+            Topmost = _topmostBeforeFullscreen;
+            WindowStyle = _windowStyleBeforeFullscreen;
+            ResizeMode = _resizeModeBeforeFullscreen;
             _viewModel.IsControlsVisible = true;
+            _hideControlsTimer.Stop();
             WindowState = _windowStateBeforeFullscreen;
         }
 
@@ -235,5 +275,63 @@ public partial class MainWindow : Window
         MaximizeButton.ToolTip = isMaximized ? "Restore" : "Maximize";
         FullscreenButton.Content = isFullscreen ? "\uE73F" : "\uE740";
         FullscreenButton.ToolTip = isFullscreen ? "Exit Fullscreen (F)" : "Fullscreen (F)";
+    }
+
+    private bool IsMouseOverVideoArea(MouseButtonEventArgs e)
+    {
+        var position = e.GetPosition(VideoView);
+        return position.X >= 0 &&
+               position.Y >= 0 &&
+               position.X <= VideoView.ActualWidth &&
+               position.Y <= VideoView.ActualHeight;
+    }
+
+    private void SetNativeVideoHostBackgroundToBlack()
+    {
+        try
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero)
+                return;
+
+            NativeMethods.EnumChildWindows(hwnd, (child, _) =>
+            {
+                NativeMethods.SetClassLongPtr(child, NativeMethods.GclpHbrBackground, NativeMethods.GetStockObject(NativeMethods.BlackBrush));
+                NativeMethods.InvalidateRect(child, IntPtr.Zero, true);
+                return true;
+            }, IntPtr.Zero);
+        }
+        catch
+        {
+            // The WPF parent is already black; this only fixes native VLC host letterbox repainting.
+        }
+    }
+
+    private static class NativeMethods
+    {
+        public const int GclpHbrBackground = -10;
+        public const int BlackBrush = 4;
+
+        public delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool EnumChildWindows(IntPtr hwndParent, EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SetClassLongPtr", SetLastError = true)]
+        public static extern IntPtr SetClassLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SetClassLong", SetLastError = true)]
+        public static extern int SetClassLong32(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern IntPtr GetStockObject(int fnObject);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool InvalidateRect(IntPtr hWnd, IntPtr lpRect, bool bErase);
+
+        public static IntPtr SetClassLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong) =>
+            IntPtr.Size == 8
+                ? SetClassLongPtr64(hWnd, nIndex, dwNewLong)
+                : new IntPtr(SetClassLong32(hWnd, nIndex, dwNewLong.ToInt32()));
     }
 }

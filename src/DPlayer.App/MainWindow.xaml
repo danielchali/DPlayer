@@ -9,10 +9,12 @@
         Height="720" Width="1280"
         MinHeight="480" MinWidth="800"
         WindowStartupLocation="CenterScreen"
-        Icon="pack://application:,,,/DPlayer;component/Assets/dplayer.png"
+        Icon="pack://application:,,,/DPlayer;component/Assets/Dplayer.ico"
         WindowStyle="None"
         ResizeMode="CanResize"
         AllowsTransparency="False"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        PreviewMouseLeftButtonDown="Window_PreviewMouseLeftButtonDown"
         KeyDown="Window_KeyDown"
         StateChanged="Window_StateChanged"
         PreviewDragOver="Window_PreviewDragOver"
@@ -189,7 +191,9 @@
                             <MenuItem Header="Fullscreen" Command="{Binding ToggleFullscreenCommand}"/>
                         </ContextMenu>
                     </Grid.ContextMenu>
-                    <vlc:VideoView x:Name="VideoView" />
+                    <vlc:VideoView x:Name="VideoView"
+                                   Background="#000000"
+                                   MouseLeftButtonDown="VideoView_MouseLeftButtonDown"/>
 
                     <!-- Drop overlay hint -->
                     <Border Background="#80000000" Visibility="Collapsed" x:Name="DropOverlay">
