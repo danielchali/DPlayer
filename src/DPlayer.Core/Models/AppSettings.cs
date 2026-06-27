@@ -46,6 +46,7 @@ public static class DefaultShortcuts
         ["VolumeUp"] = "Up",
         ["VolumeDown"] = "Down",
         ["OpenFile"] = "Ctrl+O",
+        ["OpenUrl"] = "Ctrl+U",
         ["OpenFolder"] = "Ctrl+Shift+O",
         ["SubtitleSearch"] = "Ctrl+S",
         ["Stop"] = "S",

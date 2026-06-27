@@ -29,12 +29,13 @@
     <Window.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
         <conv:PlaybackStateToIconConverter x:Key="PlayIcon"/>
+        <conv:MuteStateToIconConverter x:Key="MuteIcon"/>
         <conv:TimeSpanToStringConverter x:Key="TimeFormat"/>
     </Window.Resources>
 
     <Border x:Name="RootBorder"
-            Background="{StaticResource BackgroundBrush}"
-            CornerRadius="{StaticResource WindowCornerRadius}"
+            Background="#080808"
+            CornerRadius="0"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
             ClipToBounds="True">
@@ -47,7 +48,7 @@
             </Grid.RowDefinitions>
 
             <!-- Custom Title Bar -->
-            <Border x:Name="TitleBar" Grid.Row="0" Background="{StaticResource TitleBarGradientBrush}"
+            <Border x:Name="TitleBar" Grid.Row="0" Background="#1D1D1D"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -56,11 +57,33 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="12,0">
-                        <Image Source="pack://application:,,,/DPlayer;component/Assets/dplayer.png"
-                               Width="18" Height="18" Margin="0,0,8,0" Stretch="Uniform"/>
-                        <TextBlock Text="DPlayer" FontWeight="SemiBold" FontSize="13"
-                                   Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="7,0">
+                        <Button ToolTip="Player Menu"
+                                Click="PlayerMenu_Click"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Padding="0"
+                                Cursor="Hand">
+                            <TextBlock Text="DPlayer" FontWeight="SemiBold" FontSize="13"
+                                       Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <Button.ContextMenu>
+                                <ContextMenu Background="{StaticResource SurfaceBrush}"
+                                             DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                             Foreground="{StaticResource TextPrimaryBrush}"
+                                             BorderBrush="{StaticResource BorderBrush}">
+                                    <MenuItem Header="Open File..." Command="{Binding OpenFileCommand}"/>
+                                    <MenuItem Header="Open URL..." Command="{Binding OpenUrlCommand}"/>
+                                    <MenuItem Header="Open Folder..." Command="{Binding OpenFolderCommand}"/>
+                                    <Separator/>
+                                    <MenuItem Header="Library" Command="{Binding ToggleLibraryPanelCommand}"/>
+                                    <MenuItem Header="Playlist" Command="{Binding TogglePlaylistPanelCommand}"/>
+                                    <MenuItem Header="Subtitle Search" Command="{Binding OpenSubtitleSearchCommand}"/>
+                                    <Separator/>
+                                    <MenuItem Header="Settings" Command="{Binding OpenSettingsCommand}"/>
+                                    <MenuItem Header="Media Info" Command="{Binding ShowMediaInfoCommand}"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                     </StackPanel>
 
                     <TextBlock Grid.Column="1" Text="{Binding CurrentFileName}"
@@ -96,6 +119,7 @@
                                      Foreground="{StaticResource TextPrimaryBrush}"
                                      BorderBrush="{StaticResource BorderBrush}">
                             <MenuItem Header="Play / Pause" Command="{Binding TogglePlayPauseCommand}"/>
+                            <MenuItem Header="Open URL..." Command="{Binding OpenUrlCommand}"/>
                             <Separator/>
                             <MenuItem Header="Video">
                                 <MenuItem Header="Brightness / Contrast / Saturation" Command="{Binding OpenSettingsCommand}"/>
@@ -174,12 +198,21 @@
                                    FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
 
-                    <!-- Loading indicator -->
-                    <Border Background="#60000000"
-                            Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, ConverterParameter=inverse}">
-                        <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="64"
-                                   Foreground="#40FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Visibility="{Binding CurrentFileName, Converter={StaticResource BoolToVis}, ConverterParameter=inverse}"/>
+                    <!-- Idle center mark -->
+                    <Border Background="#000000"
+                            Visibility="{Binding CurrentFileName, Converter={StaticResource BoolToVis}, ConverterParameter=inverse}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="DPlayer" FontSize="29" FontWeight="Bold"
+                                       Foreground="#363636" HorizontalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
+                                <Button Content="Open File" Style="{StaticResource KmPillButtonStyle}"
+                                        Command="{Binding OpenFileCommand}" Margin="0,0,8,0"/>
+                                <Button Content="Open URL" Style="{StaticResource KmPillButtonStyle}"
+                                        Command="{Binding OpenUrlCommand}" Margin="0,0,8,0"/>
+                                <Button Content="Library" Style="{StaticResource KmPillButtonStyle}"
+                                        Command="{Binding ToggleLibraryPanelCommand}"/>
+                            </StackPanel>
+                        </StackPanel>
                     </Border>
 
                     <!-- On-screen display -->
@@ -219,6 +252,7 @@
                         <Grid Grid.Row="1" DataContext="{Binding PlaylistVm}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
@@ -229,6 +263,10 @@
                                         Command="{Binding AddFileCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
                                 <Button Content="Import" Style="{StaticResource TextButtonStyle}"
                                         Command="{Binding ImportPlaylistCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
+                                <Button Content="Export" Style="{StaticResource TextButtonStyle}"
+                                        Command="{Binding ExportPlaylistCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
+                                <Button Content="Use" Style="{StaticResource TextButtonStyle}"
+                                        Command="{Binding ActivatePlaylistCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
                                 <Button Content="Up" Style="{StaticResource TextButtonStyle}"
                                         Command="{Binding MoveSelectedUpCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
                                 <Button Content="Down" Style="{StaticResource TextButtonStyle}"
@@ -239,20 +277,151 @@
                                         Command="{Binding ClearPlaylistCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
                             </WrapPanel>
 
-                            <ListBox Grid.Row="1" Style="{StaticResource DPlayerListBoxStyle}"
+                            <ComboBox Grid.Row="1" Style="{StaticResource DPlayerComboBoxStyle}"
+                                      ItemsSource="{Binding Playlists}"
+                                      SelectedItem="{Binding SelectedPlaylist}"
+                                      DisplayMemberPath="Name"
+                                      Margin="8,0,8,8"/>
+
+                            <ListBox Grid.Row="2" Style="{StaticResource DPlayerListBoxStyle}"
                                      ItemContainerStyle="{StaticResource DPlayerListBoxItemStyle}"
                                      ItemsSource="{Binding SelectedPlaylist.Items}"
                                      SelectedItem="{Binding SelectedEntry}"
-                                     Margin="4"/>
+                                     MouseDoubleClick="PlaylistItems_MouseDoubleClick"
+                                     Margin="4">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding FilePath}" FontSize="11"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Side Panel (Library) -->
+                <Border Grid.Column="1" Width="{StaticResource SidePanelWidth}"
+                        Background="{StaticResource SurfaceBrush}"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0"
+                        Visibility="{Binding IsLibraryPanelOpen, Converter={StaticResource BoolToVis}}">
+                    <Grid DataContext="{Binding LibraryVm}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Padding="12,8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                            <Grid>
+                                <TextBlock Text="Library" FontWeight="SemiBold" FontSize="14"/>
+                                <Button Content="&#xE711;" Style="{StaticResource IconButtonStyle}"
+                                        HorizontalAlignment="Right" Width="28" Height="28"
+                                        Command="{Binding DataContext.ToggleLibraryPanelCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            </Grid>
+                        </Border>
+
+                        <Grid Grid.Row="1" Margin="8">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Row="0" Grid.Column="0" Style="{StaticResource DPlayerTextBoxStyle}"
+                                     Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Search indexed media"/>
+                            <Button Grid.Row="0" Grid.Column="1" Content="Search" Style="{StaticResource TextButtonStyle}"
+                                    Command="{Binding SearchCommand}" Width="Auto" Padding="10,4" Margin="6,0,0,0"/>
+                            <Button Grid.Row="1" Grid.ColumnSpan="2" Content="Scan Folder" Style="{StaticResource AccentButtonStyle}"
+                                    Command="{Binding ScanFolderCommand}" Margin="0,8,0,0"/>
+                        </Grid>
+
+                        <TabControl Grid.Row="2" Margin="4" Background="Transparent" BorderThickness="0">
+                            <TabItem Header="Results">
+                                <ListBox Style="{StaticResource DPlayerListBoxStyle}"
+                                         ItemContainerStyle="{StaticResource DPlayerListBoxItemStyle}"
+                                         ItemsSource="{Binding SearchResults}"
+                                         MouseDoubleClick="LibraryItems_MouseDoubleClick">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding FilePath}" FontSize="11"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </TabItem>
+                            <TabItem Header="Recent">
+                                <ListBox Style="{StaticResource DPlayerListBoxStyle}"
+                                         ItemContainerStyle="{StaticResource DPlayerListBoxItemStyle}"
+                                         ItemsSource="{Binding RecentFiles}"
+                                         MouseDoubleClick="LibraryItems_MouseDoubleClick">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding FilePath}" FontSize="11"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </TabItem>
+                            <TabItem Header="Favorites">
+                                <ListBox Style="{StaticResource DPlayerListBoxStyle}"
+                                         ItemContainerStyle="{StaticResource DPlayerListBoxItemStyle}"
+                                         ItemsSource="{Binding Favorites}"
+                                         MouseDoubleClick="LibraryItems_MouseDoubleClick">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding FilePath}" FontSize="11"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </TabItem>
+                            <TabItem Header="Later">
+                                <ListBox Style="{StaticResource DPlayerListBoxStyle}"
+                                         ItemContainerStyle="{StaticResource DPlayerListBoxItemStyle}"
+                                         ItemsSource="{Binding WatchLater}"
+                                         MouseDoubleClick="LibraryItems_MouseDoubleClick">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding FilePath}" FontSize="11"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </TabItem>
+                        </TabControl>
                     </Grid>
                 </Border>
             </Grid>
 
             <!-- Control Bar -->
-            <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
-                    Padding="16,8"
+            <Border Grid.Row="2" Background="#1B1B1B"
+                    BorderBrush="#292929" BorderThickness="0,1,0,0"
+                    Padding="8,5"
                     Visibility="{Binding IsControlsVisible, Converter={StaticResource BoolToVis}}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -261,14 +430,14 @@
                     </Grid.RowDefinitions>
 
                     <!-- Seek Bar -->
-                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                    <Grid Grid.Row="0" Margin="0,0,0,3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="{Binding Position, Converter={StaticResource TimeFormat}}"
-                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"
+                                   Foreground="#858585" FontSize="12"
                                    VerticalAlignment="Center" Margin="0,0,8,0" FontFamily="{StaticResource MonoFont}"/>
                         <Slider Grid.Column="1" Style="{StaticResource SeekSliderStyle}"
                                 Minimum="0" Maximum="{Binding Duration.TotalSeconds}"
@@ -278,7 +447,7 @@
                                 PreviewKeyUp="SeekSlider_PreviewKeyUp"
                                 ValueChanged="SeekSlider_ValueChanged"/>
                         <TextBlock Grid.Column="2" Text="{Binding Duration, Converter={StaticResource TimeFormat}}"
-                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"
+                                   Foreground="#858585" FontSize="12"
                                    VerticalAlignment="Center" Margin="8,0,0,0" FontFamily="{StaticResource MonoFont}"/>
                     </Grid>
 
@@ -294,17 +463,23 @@
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                             <Button Style="{StaticResource IconButtonStyle}" Content="&#xE8E5;"
                                     Command="{Binding OpenFileCommand}" ToolTip="Open File (Ctrl+O)"/>
+                            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE71B;"
+                                    Command="{Binding OpenUrlCommand}" ToolTip="Open URL (Ctrl+U)"/>
                             <Button Style="{StaticResource IconButtonStyle}" Content="&#xE721;"
                                     Command="{Binding OpenSubtitleSearchCommand}" ToolTip="Search Subtitles (Ctrl+S)"/>
                             <Button Style="{StaticResource IconButtonStyle}" Content="&#xE8FD;"
                                     Command="{Binding TogglePlaylistPanelCommand}" ToolTip="Playlist (L)"/>
-                            <TextBlock Text="{Binding PlaybackSpeedText}" Foreground="{StaticResource AccentBrush}"
-                                       VerticalAlignment="Center" Margin="8,0" FontSize="12" FontWeight="SemiBold"
+                            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE80F;"
+                                    Command="{Binding ToggleLibraryPanelCommand}" ToolTip="Library"/>
+                            <TextBlock Text="{Binding PlaybackSpeedText}" Foreground="#858585"
+                                       VerticalAlignment="Center" Margin="7,0" FontSize="11" FontWeight="SemiBold"
                                        Cursor="Hand" MouseLeftButtonUp="SpeedText_Click"/>
                         </StackPanel>
 
                         <!-- Center transport -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Style="{StaticResource TransportButtonStyle}" Content="&#xE8E5;"
+                                    Command="{Binding OpenFileCommand}" ToolTip="Open File"/>
                             <Button Style="{StaticResource TransportButtonStyle}" Content="&#xE892;"
                                     Command="{Binding PlayPreviousCommand}" ToolTip="Previous"/>
                             <Button Style="{StaticResource PlayButtonStyle}"
@@ -313,6 +488,8 @@
                                     Command="{Binding TogglePlayPauseCommand}" ToolTip="Play/Pause (Space)"/>
                             <Button Style="{StaticResource TransportButtonStyle}" Content="&#xE893;"
                                     Command="{Binding PlayNextCommand}" ToolTip="Next"/>
+                            <Button Style="{StaticResource TransportButtonStyle}" Content="&#xE71A;"
+                                    Command="{Binding StopCommand}" ToolTip="Stop"/>
                         </StackPanel>
 
                         <!-- Right controls -->
@@ -338,12 +515,11 @@
                             </Button>
                             <Button Style="{StaticResource IconButtonStyle}" Content="&#xE7B3;"
                                     Command="{Binding TakeScreenshotCommand}" ToolTip="Screenshot"/>
-                            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE713;"
-                                    Command="{Binding OpenSettingsCommand}" ToolTip="Settings"/>
                             <Button x:Name="FullscreenButton" Style="{StaticResource IconButtonStyle}" Content="&#xE740;"
                                     Command="{Binding ToggleFullscreenCommand}" ToolTip="Fullscreen (F)"/>
-                            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE767;"
-                                    Click="MuteButton_Click" ToolTip="Mute (M)"/>
+                            <Button Style="{StaticResource IconButtonStyle}"
+                                    Content="{Binding IsMuted, Converter={StaticResource MuteIcon}}"
+                                    Command="{Binding ToggleMuteCommand}" ToolTip="Mute (M)"/>
                             <Slider Style="{StaticResource VolumeSliderStyle}" Minimum="0" Maximum="100"
                                     Value="{Binding Volume, Mode=TwoWay}" Margin="4,0"/>
                         </StackPanel>

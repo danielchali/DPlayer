@@ -11,6 +11,7 @@ namespace DPlayer.App.ViewModels;
 public partial class SettingsViewModel : ObservableObject
 {
     private readonly ISettingsService _settings;
+    private readonly IMediaPlayerService _player;
     private readonly ThemeService _theme;
     private readonly IUpdateService _updateService;
     private readonly IDialogService _dialogs;
@@ -46,18 +47,20 @@ public partial class SettingsViewModel : ObservableObject
 
     public SettingsViewModel(
         ISettingsService settings,
+        IMediaPlayerService player,
         ThemeService theme,
         IUpdateService updateService,
         IDialogService dialogs)
     {
         _settings = settings;
+        _player = player;
         _theme = theme;
         _updateService = updateService;
         _dialogs = dialogs;
-        LoadFromSettings();
+        Reload();
     }
 
-    private void LoadFromSettings()
+    public void Reload()
     {
         var s = _settings.Settings;
         SelectedTheme = s.Theme;
@@ -77,6 +80,7 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     partial void OnSelectedThemeChanged(AppTheme value) => _theme.ApplyTheme(value);
+    partial void OnHardwareAccelerationChanged(bool value) => _player.SetHardwareAcceleration(value);
 
     [RelayCommand]
     private async Task Save()
@@ -96,6 +100,8 @@ public partial class SettingsViewModel : ObservableObject
         s.AudioNormalization = AudioNormalization;
         s.EnableSurroundSimulation = SurroundSimulation;
         s.BassBoost = BassBoost;
+        _theme.ApplyTheme(SelectedTheme);
+        _player.SetHardwareAcceleration(HardwareAcceleration);
         await _settings.SaveAsync();
         _dialogs.ShowMessage("Settings", "Settings saved successfully.");
     }
@@ -126,10 +132,10 @@ public partial class LibraryViewModel : ObservableObject
     {
         _library = library;
         _dialogs = dialogs;
-        _ = LoadAsync();
+        _ = RefreshAsync();
     }
 
-    private async Task LoadAsync()
+    public async Task RefreshAsync()
     {
         RecentFiles = new ObservableCollection<MediaItem>(await _library.GetRecentAsync());
         Favorites = new ObservableCollection<MediaItem>(await _library.GetFavoritesAsync());
@@ -150,6 +156,7 @@ public partial class LibraryViewModel : ObservableObject
         if (folder is not null)
         {
             await _library.ScanFolderAsync(folder);
+            await RefreshAsync();
             await Search();
         }
     }

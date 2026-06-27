@@ -111,6 +111,7 @@ public interface ILibraryService
     Task ScanFolderAsync(string folderPath, IProgress<int>? progress = null);
     Task<IReadOnlyList<MediaItem>> SearchAsync(string query, LibraryItemType? type = null);
     Task<IReadOnlyList<MediaItem>> GetRecentAsync(int count = 20);
+    Task RecordRecentAsync(string filePath, string title);
     Task AddToFavoritesAsync(string filePath);
     Task RemoveFromFavoritesAsync(string filePath);
     Task<IReadOnlyList<MediaItem>> GetFavoritesAsync();

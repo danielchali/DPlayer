@@ -52,6 +52,15 @@ public sealed class PlaybackStateToIconConverter : IValueConverter
         throw new NotSupportedException();
 }
 
+public sealed class MuteStateToIconConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
+        value is true ? "\uE74F" : "\uE767";
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
 public sealed class TimeSpanToStringConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

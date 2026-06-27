@@ -30,6 +30,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _isPlaying;
     [ObservableProperty] private bool _isFullscreen;
     [ObservableProperty] private bool _isPlaylistPanelOpen;
+    [ObservableProperty] private bool _isLibraryPanelOpen;
     [ObservableProperty] private bool _isSubtitlePanelOpen;
     [ObservableProperty] private bool _isControlsVisible = true;
     [ObservableProperty] private bool _isShuffle;
@@ -49,12 +50,13 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _osdText = string.Empty;
     [ObservableProperty] private bool _isOsdVisible;
 
-  public static readonly double[] SpeedOptions = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 4.0];
+    public static readonly double[] SpeedOptions = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 4.0];
     private int _speedIndex = 3;
     private CancellationTokenSource? _osdCts;
 
     public PlaylistViewModel PlaylistVm { get; }
     public SubtitleViewModel SubtitleVm { get; }
+    public LibraryViewModel LibraryVm { get; }
 
     public MainViewModel(
         IMediaPlayerService player,
@@ -66,6 +68,7 @@ public partial class MainViewModel : ObservableObject
         ISubtitleService subtitles,
         PlaylistViewModel playlistVm,
         SubtitleViewModel subtitleVm,
+        LibraryViewModel libraryVm,
         ILogger<MainViewModel> logger)
     {
         _player = player;
@@ -78,6 +81,7 @@ public partial class MainViewModel : ObservableObject
         _logger = logger;
         PlaylistVm = playlistVm;
         SubtitleVm = subtitleVm;
+        LibraryVm = libraryVm;
 
         Volume = settings.Settings.DefaultVolume;
         PlaybackSpeed = settings.Settings.DefaultPlaybackSpeed;
@@ -134,6 +138,8 @@ public partial class MainViewModel : ObservableObject
 
             CurrentFileName = Path.GetFileName(path);
             Title = $"DPlayer - {CurrentFileName}";
+            await _library.RecordRecentAsync(path, CurrentFileName);
+            await LibraryVm.RefreshAsync();
 
             if (_settings.Settings.AutoDownloadSubtitles)
             {
@@ -154,6 +160,29 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task OpenUrl()
+    {
+        var url = await _dialogs.PromptTextAsync("Open URL", "Enter a network stream, playlist, or media URL:", "https://");
+        if (url is null) return;
+
+        try
+        {
+            await _player.LoadStreamAsync(url);
+            _player.Volume = Volume;
+            _player.PlaybackSpeed = PlaybackSpeed;
+            _player.Play();
+            CurrentFileName = url;
+            Title = $"DPlayer - {url}";
+            ShowOsd("Network stream opened");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to open URL {Url}", url);
+            _dialogs.ShowMessage("Open URL", $"Could not open URL: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
     private async Task OpenFolder()
     {
         var folder = await _dialogs.OpenFolderAsync();
@@ -163,8 +192,23 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void TogglePlayPause()
+    private async Task TogglePlayPause()
     {
+        if (_player.CurrentMedia is null)
+        {
+            var recent = await _library.GetRecentAsync(1);
+            var last = recent.FirstOrDefault(m => File.Exists(m.FilePath));
+            if (last is not null)
+            {
+                await OpenFileAsync(last.FilePath);
+                ShowOsd($"Playing {last.Title}");
+                return;
+            }
+
+            await OpenFile();
+            return;
+        }
+
         _player.TogglePlayPause();
         ShowOsd(IsPlaying ? "Pause" : "Play");
     }
@@ -265,6 +309,12 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ToggleMute()
+    {
+        IsMuted = !IsMuted;
+    }
+
+    [RelayCommand]
     private void VolumeUp()
     {
         Volume = Math.Min(100, Volume + 5);
@@ -333,7 +383,20 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void TogglePlaylistPanel() => IsPlaylistPanelOpen = !IsPlaylistPanelOpen;
+    private void TogglePlaylistPanel()
+    {
+        IsPlaylistPanelOpen = !IsPlaylistPanelOpen;
+        if (IsPlaylistPanelOpen)
+            IsLibraryPanelOpen = false;
+    }
+
+    [RelayCommand]
+    private void ToggleLibraryPanel()
+    {
+        IsLibraryPanelOpen = !IsLibraryPanelOpen;
+        if (IsLibraryPanelOpen)
+            IsPlaylistPanelOpen = false;
+    }
 
     [RelayCommand]
     private void ToggleSubtitlePanel() => IsSubtitlePanelOpen = !IsSubtitlePanelOpen;

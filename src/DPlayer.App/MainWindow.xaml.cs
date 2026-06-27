@@ -33,7 +33,7 @@ public partial class MainWindow : Window
         _hideControlsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
         _hideControlsTimer.Tick += (_, _) =>
         {
-            if (_viewModel.IsFullscreen && _viewModel.IsPlaying)
+            if (_viewModel.IsFullscreen)
                 _viewModel.IsControlsVisible = false;
         };
 
@@ -80,6 +80,15 @@ public partial class MainWindow : Window
         WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void PlayerMenu_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button button || button.ContextMenu is null)
+            return;
+
+        button.ContextMenu.PlacementTarget = button;
+        button.ContextMenu.IsOpen = true;
+    }
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
@@ -145,6 +154,18 @@ public partial class MainWindow : Window
     private void SpeedText_Click(object sender, MouseButtonEventArgs e) =>
         _viewModel.CyclePlaybackSpeedCommand.Execute(null);
 
+    private async void PlaylistItems_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (_viewModel.PlaylistVm.SelectedEntry is not null)
+            await _viewModel.OpenFileAsync(_viewModel.PlaylistVm.SelectedEntry.FilePath);
+    }
+
+    private async void LibraryItems_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is System.Windows.Controls.ListBox { SelectedItem: Core.Models.MediaItem item })
+            await _viewModel.OpenFileAsync(item.FilePath);
+    }
+
     private void MuteButton_Click(object sender, RoutedEventArgs e) =>
         _viewModel.IsMuted = !_viewModel.IsMuted;
 
@@ -175,6 +196,10 @@ public partial class MainWindow : Window
         if (_viewModel.IsFullscreen)
         {
             _windowStateBeforeFullscreen = WindowState == WindowState.Minimized ? WindowState.Normal : WindowState;
+            _viewModel.IsPlaylistPanelOpen = false;
+            _viewModel.IsLibraryPanelOpen = false;
+            _viewModel.IsControlsVisible = false;
+            _hideControlsTimer.Stop();
             WindowState = WindowState.Normal;
             ResizeMode = ResizeMode.NoResize;
             Topmost = true;
@@ -184,6 +209,7 @@ public partial class MainWindow : Window
         {
             Topmost = false;
             ResizeMode = ResizeMode.CanResize;
+            _viewModel.IsControlsVisible = true;
             WindowState = _windowStateBeforeFullscreen;
         }
 

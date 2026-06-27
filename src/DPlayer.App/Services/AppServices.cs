@@ -11,6 +11,7 @@ public interface IDialogService
     Task<string?> OpenFileAsync(string filter);
     Task<string?> OpenFolderAsync();
     Task<string?> SaveFileAsync(string filter, string defaultName);
+    Task<string?> PromptTextAsync(string title, string message, string defaultValue = "");
     void ShowMessage(string title, string message);
     Task<bool> ConfirmAsync(string title, string message);
     void ShowSettingsWindow();
@@ -45,6 +46,66 @@ public sealed class DialogService : IDialogService
         return Task.FromResult(dialog.ShowDialog() == true ? dialog.FileName : null);
     }
 
+    public Task<string?> PromptTextAsync(string title, string message, string defaultValue = "")
+    {
+        var input = new System.Windows.Controls.TextBox
+        {
+            Text = defaultValue,
+            MinWidth = 420,
+            Margin = new Thickness(0, 8, 0, 12)
+        };
+
+        var window = new Window
+        {
+            Title = title,
+            Owner = Application.Current.MainWindow,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            ResizeMode = ResizeMode.NoResize,
+            SizeToContent = SizeToContent.WidthAndHeight,
+            Background = Application.Current.TryFindResource("BackgroundBrush") as Brush,
+            Foreground = Application.Current.TryFindResource("TextPrimaryBrush") as Brush,
+            Content = new System.Windows.Controls.StackPanel
+            {
+                Margin = new Thickness(18),
+                Children =
+                {
+                    new System.Windows.Controls.TextBlock { Text = message },
+                    input,
+                    new System.Windows.Controls.StackPanel
+                    {
+                        Orientation = System.Windows.Controls.Orientation.Horizontal,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Children =
+                        {
+                            new System.Windows.Controls.Button
+                            {
+                                Content = "Open",
+                                IsDefault = true,
+                                MinWidth = 82,
+                                Margin = new Thickness(0, 0, 8, 0)
+                            },
+                            new System.Windows.Controls.Button
+                            {
+                                Content = "Cancel",
+                                IsCancel = true,
+                                MinWidth = 82
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        var buttons = ((System.Windows.Controls.StackPanel)((System.Windows.Controls.StackPanel)window.Content).Children[2]).Children;
+        ((System.Windows.Controls.Button)buttons[0]).Click += (_, _) => window.DialogResult = true;
+        ((System.Windows.Controls.Button)buttons[1]).Click += (_, _) => window.DialogResult = false;
+
+        input.SelectAll();
+        input.Focus();
+        var result = window.ShowDialog() == true ? input.Text.Trim() : null;
+        return Task.FromResult(string.IsNullOrWhiteSpace(result) ? null : result);
+    }
+
     public void ShowMessage(string title, string message) =>
         MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -53,10 +114,12 @@ public sealed class DialogService : IDialogService
 
     public void ShowSettingsWindow()
     {
+        var viewModel = App.Services.GetRequiredService<ViewModels.SettingsViewModel>();
+        viewModel.Reload();
         var window = new Views.SettingsWindow
         {
             Owner = Application.Current.MainWindow,
-            DataContext = App.Services.GetRequiredService<ViewModels.SettingsViewModel>()
+            DataContext = viewModel
         };
         window.ShowDialog();
     }
@@ -106,11 +169,11 @@ public sealed class FileService : IFileService
 
 public sealed class ThemeService
 {
+    private const string ThemePathPrefix = "Themes/Colors.";
+
     public void ApplyTheme(AppTheme theme)
     {
         var app = Application.Current;
-        var merged = app.Resources.MergedDictionaries;
-
         var themeFile = theme switch
         {
             AppTheme.DarkGreen => "Themes/Colors.DarkGreen.xaml",
@@ -120,11 +183,24 @@ public sealed class ThemeService
             _ => "Themes/Colors.DarkGreen.xaml"
         };
 
-        merged.RemoveAt(0);
-        merged.Insert(0, new ResourceDictionary
+        var nextTheme = new ResourceDictionary
         {
             Source = new Uri(themeFile, UriKind.Relative)
-        });
+        };
+
+        var dictionaries = app.Resources.MergedDictionaries;
+        for (var i = 0; i < dictionaries.Count; i++)
+        {
+            var source = dictionaries[i].Source?.OriginalString;
+            if (source is not null &&
+                source.Contains(ThemePathPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                dictionaries[i] = nextTheme;
+                return;
+            }
+        }
+
+        dictionaries.Insert(0, nextTheme);
     }
 }
 
@@ -191,6 +267,16 @@ public static class KeyboardShortcutHandler
         if (shortcuts.TryGetValue("Stop", out var stop) && key == stop)
         {
             vm.StopCommand.Execute(null);
+            return true;
+        }
+        if (shortcuts.TryGetValue("Mute", out var mute) && key == mute)
+        {
+            vm.ToggleMuteCommand.Execute(null);
+            return true;
+        }
+        if (shortcuts.TryGetValue("OpenUrl", out var openUrl) && key == openUrl)
+        {
+            vm.OpenUrlCommand.Execute(null);
             return true;
         }
         if (shortcuts.TryGetValue("FrameBack", out var frameBack) && key == frameBack)

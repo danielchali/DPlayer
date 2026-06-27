@@ -398,6 +398,28 @@ public sealed class LibraryService : ILibraryService
         }).ToList();
     }
 
+    public async Task RecordRecentAsync(string filePath, string title)
+    {
+        var existing = await _db.RecentFiles.FirstOrDefaultAsync(r => r.FilePath == filePath);
+        if (existing is null)
+        {
+            _db.RecentFiles.Add(new RecentFileEntity
+            {
+                Id = Guid.NewGuid(),
+                FilePath = filePath,
+                Title = title,
+                LastOpened = DateTime.UtcNow
+            });
+        }
+        else
+        {
+            existing.Title = title;
+            existing.LastOpened = DateTime.UtcNow;
+        }
+
+        await _db.SaveChangesAsync();
+    }
+
     public async Task AddToFavoritesAsync(string filePath)
     {
         if (await _db.Favorites.AnyAsync(f => f.FilePath == filePath)) return;
