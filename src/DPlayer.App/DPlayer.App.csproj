@@ -15,6 +15,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\Dplayer.ico" />
+    <Resource Include="Assets\nature_doc.jpg" />
+    <Resource Include="Assets\city_lights.jpg" />
+    <Resource Include="Assets\anime_movie.jpg" />
+    <Resource Include="Assets\ocean_life.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DPlayer.Core\DPlayer.Core.csproj" />
     <ProjectReference Include="..\DPlayer.Infrastructure\DPlayer.Infrastructure.csproj" />
     <ProjectReference Include="..\DPlayer.Plugins\DPlayer.Plugins.csproj" />

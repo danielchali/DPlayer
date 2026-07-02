@@ -4,6 +4,7 @@ using System.Windows.Interop;
 using System.Windows.Threading;
 using DPlayer.App.Services;
 using DPlayer.App.ViewModels;
+using DPlayer.Core.Enums;
 using DPlayer.Core.Interfaces;
 using DPlayer.Infrastructure.Playback;
 using LibVLCSharp.Shared;
@@ -15,6 +16,7 @@ public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
     private readonly ISettingsService _settings;
+    private readonly IMediaPlayerService _playerService;
     private readonly DispatcherTimer _hideControlsTimer;
     private MediaPlayer? _mediaPlayer;
     private bool _isSeekingWithSlider;
@@ -23,10 +25,11 @@ public partial class MainWindow : Window
     private ResizeMode _resizeModeBeforeFullscreen = ResizeMode.CanResize;
     private bool _topmostBeforeFullscreen;
 
-    public MainWindow(MainViewModel viewModel, ISettingsService settings)
+    public MainWindow(MainViewModel viewModel, ISettingsService settings, IMediaPlayerService playerService)
     {
         _viewModel = viewModel;
         _settings = settings;
+        _playerService = playerService;
         DataContext = viewModel;
 
         InitializeComponent();
@@ -44,10 +47,11 @@ public partial class MainWindow : Window
         _viewModel.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(MainViewModel.IsFullscreen))
-            {
                 ApplyFullscreenState();
-            }
         };
+
+        _playerService.StateChanged += OnPlayerStateChanged;
+        VideoView.SizeChanged += (_, _) => ScheduleVideoBackgroundFix();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -55,12 +59,40 @@ public partial class MainWindow : Window
         WindowHelper.EnableMica(this);
         UpdateWindowChromeState();
 
-        if (App.Services.GetRequiredService<IMediaPlayerService>() is LibVlcMediaPlayerService playerService)
+        if (_playerService is LibVlcMediaPlayerService vlcService)
         {
-            _mediaPlayer = playerService.CreateAndAttachPlayer();
+            _mediaPlayer = vlcService.CreateAndAttachPlayer();
             VideoView.MediaPlayer = _mediaPlayer;
-            SetNativeVideoHostBackgroundToBlack();
+            ScheduleVideoBackgroundFix();
         }
+    }
+
+    private void OnPlayerStateChanged(object? sender, PlaybackState state)
+    {
+        if (state is PlaybackState.Playing or PlaybackState.Buffering)
+            ScheduleVideoBackgroundFix();
+    }
+
+    private void ScheduleVideoBackgroundFix()
+    {
+        if (!IsLoaded)
+            return;
+
+        SetNativeVideoHostBackgroundToBlack();
+        Dispatcher.BeginInvoke(SetNativeVideoHostBackgroundToBlack, DispatcherPriority.Loaded);
+        QueueDelayedVideoBackgroundFix(100);
+        QueueDelayedVideoBackgroundFix(400);
+    }
+
+    private void QueueDelayedVideoBackgroundFix(int delayMs)
+    {
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(delayMs) };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            SetNativeVideoHostBackgroundToBlack();
+        };
+        timer.Start();
     }
 
     private async void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
@@ -142,17 +174,11 @@ public partial class MainWindow : Window
         {
             _viewModel.ToggleFullscreenCommand.Execute(null);
             e.Handled = true;
+            return;
         }
-        else
-        {
-            _viewModel.TogglePlayPauseCommand.Execute(null);
-            e.Handled = true;
-        }
-    }
 
-    private void VideoView_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        VideoArea_MouseLeftButtonDown(sender, e);
+        _viewModel.TogglePlayPauseCommand.Execute(null);
+        e.Handled = true;
     }
 
     private void Window_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -279,32 +305,45 @@ public partial class MainWindow : Window
 
     private bool IsMouseOverVideoArea(MouseButtonEventArgs e)
     {
-        var position = e.GetPosition(VideoView);
+        var position = e.GetPosition(VideoOverlay);
         return position.X >= 0 &&
                position.Y >= 0 &&
-               position.X <= VideoView.ActualWidth &&
-               position.Y <= VideoView.ActualHeight;
+               position.X <= VideoOverlay.ActualWidth &&
+               position.Y <= VideoOverlay.ActualHeight;
     }
 
     private void SetNativeVideoHostBackgroundToBlack()
     {
         try
         {
+            var blackBrush = NativeMethods.GetStockObject(NativeMethods.BlackBrush);
+
+            if (_mediaPlayer is { Hwnd: var playerHwnd } && playerHwnd != IntPtr.Zero)
+                PaintHwndBackgroundBlack(playerHwnd, blackBrush);
+
             var hwnd = new WindowInteropHelper(this).Handle;
             if (hwnd == IntPtr.Zero)
                 return;
 
-            NativeMethods.EnumChildWindows(hwnd, (child, _) =>
+            NativeMethods.EnumChildWindows(hwnd, (child, lParam) =>
             {
-                NativeMethods.SetClassLongPtr(child, NativeMethods.GclpHbrBackground, NativeMethods.GetStockObject(NativeMethods.BlackBrush));
-                NativeMethods.InvalidateRect(child, IntPtr.Zero, true);
+                PaintHwndBackgroundBlack(child, lParam);
                 return true;
-            }, IntPtr.Zero);
+            }, blackBrush);
         }
         catch
         {
-            // The WPF parent is already black; this only fixes native VLC host letterbox repainting.
+            // WPF parent is already black; this fixes native VLC host letterbox repainting.
         }
+    }
+
+    private static void PaintHwndBackgroundBlack(IntPtr hwnd, IntPtr blackBrush)
+    {
+        if (hwnd == IntPtr.Zero)
+            return;
+
+        NativeMethods.SetClassLongPtr(hwnd, NativeMethods.GclpHbrBackground, blackBrush);
+        NativeMethods.InvalidateRect(hwnd, IntPtr.Zero, true);
     }
 
     private static class NativeMethods

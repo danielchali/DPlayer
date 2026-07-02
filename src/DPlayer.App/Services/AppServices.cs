@@ -107,10 +107,10 @@ public sealed class DialogService : IDialogService
     }
 
     public void ShowMessage(string title, string message) =>
-        MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+        Views.MessageDialogWindow.ShowMessage(Application.Current.MainWindow, title, message);
 
     public Task<bool> ConfirmAsync(string title, string message) =>
-        Task.FromResult(MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes);
+        Task.FromResult(Views.MessageDialogWindow.ShowConfirm(Application.Current.MainWindow, title, message));
 
     public void ShowSettingsWindow()
     {

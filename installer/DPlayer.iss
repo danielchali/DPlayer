@@ -23,7 +23,7 @@ WizardStyle=modern
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-SetupIconFile=..\src\DPlayer.App\Assets\dplayer.ico
+SetupIconFile=..\src\DPlayer.App\Assets\Dplayer.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Languages]

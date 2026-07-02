@@ -41,6 +41,15 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private double _brightness = 1.0;
     [ObservableProperty] private double _contrast = 1.0;
     [ObservableProperty] private double _saturation = 1.0;
+    [ObservableProperty] private bool _isControlsVisible = true;
+    [ObservableProperty] private bool _isShuffle;
+    [ObservableProperty] private bool _isLooping;
+    [ObservableProperty] private bool _isMuted;
+    [ObservableProperty] private PlaybackState _playbackState;
+    [ObservableProperty] private string _playbackSpeedText = "1.0x";
+    [ObservableProperty] private double _brightness = 1.0;
+    [ObservableProperty] private double _contrast = 1.0;
+    [ObservableProperty] private double _saturation = 1.0;
     [ObservableProperty] private AspectRatioMode _aspectRatio = AspectRatioMode.Auto;
     [ObservableProperty] private VideoRotation _rotation = VideoRotation.None;
     [ObservableProperty] private ObservableCollection<AudioTrack> _audioTracks = [];
@@ -49,6 +58,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _selectedSubtitleTrackText = "Subtitles";
     [ObservableProperty] private string _osdText = string.Empty;
     [ObservableProperty] private bool _isOsdVisible;
+    [ObservableProperty] private string _currentView = "Home";
+    [ObservableProperty] private ObservableCollection<ContinueWatchingItem> _continueWatchingItems = [];
 
     public static readonly double[] SpeedOptions = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 4.0];
     private int _speedIndex = 3;
@@ -106,6 +117,42 @@ public partial class MainViewModel : ObservableObject
             }
         };
         _player.ErrorOccurred += (_, msg) => _dialogs.ShowMessage("Playback Error", msg);
+
+        ContinueWatchingItems = new ObservableCollection<ContinueWatchingItem>
+        {
+            new ContinueWatchingItem
+            {
+                Title = "Nature Documentary.mp4",
+                FilePath = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                Progress = 43,
+                ImagePath = "pack://application:,,,/DPlayer;component/Assets/nature_doc.jpg",
+                DurationText = "45:12"
+            },
+            new ContinueWatchingItem
+            {
+                Title = "City Lights.mp4",
+                FilePath = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                Progress = 67,
+                ImagePath = "pack://application:,,,/DPlayer;component/Assets/city_lights.jpg",
+                DurationText = "32:18"
+            },
+            new ContinueWatchingItem
+            {
+                Title = "Anime Movie.mp4",
+                FilePath = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                Progress = 51,
+                ImagePath = "pack://application:,,,/DPlayer;component/Assets/anime_movie.jpg",
+                DurationText = "23:45"
+            },
+            new ContinueWatchingItem
+            {
+                Title = "Ocean Life.mp4",
+                FilePath = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+                Progress = 28,
+                ImagePath = "pack://application:,,,/DPlayer;component/Assets/ocean_life.jpg",
+                DurationText = "18:03"
+            }
+        };
     }
 
     [RelayCommand]
@@ -138,6 +185,7 @@ public partial class MainViewModel : ObservableObject
 
             CurrentFileName = Path.GetFileName(path);
             Title = $"DPlayer - {CurrentFileName}";
+            CurrentView = "Player";
             await _library.RecordRecentAsync(path, CurrentFileName);
             await LibraryVm.RefreshAsync();
 
@@ -173,6 +221,7 @@ public partial class MainViewModel : ObservableObject
             _player.Play();
             CurrentFileName = url;
             Title = $"DPlayer - {url}";
+            CurrentView = "Player";
             ShowOsd("Network stream opened");
         }
         catch (Exception ex)
@@ -665,4 +714,34 @@ public partial class MainViewModel : ObservableObject
         }
         return $"{value:0.##} {units[unit]}";
     }
+
+    [RelayCommand]
+    private async Task PlayContinueWatching(ContinueWatchingItem item)
+    {
+        try
+        {
+            await _player.LoadStreamAsync(item.FilePath);
+            _player.Volume = Volume;
+            _player.PlaybackSpeed = PlaybackSpeed;
+            _player.Play();
+            CurrentFileName = item.Title;
+            Title = $"DPlayer - {item.Title}";
+            CurrentView = "Player";
+            ShowOsd($"Resuming {item.Title}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to stream continue watching item {Url}", item.FilePath);
+            _dialogs.ShowMessage("Playback Error", $"Could not stream: {ex.Message}");
+        }
+    }
+}
+
+public sealed class ContinueWatchingItem
+{
+    public string Title { get; set; } = string.Empty;
+    public string FilePath { get; set; } = string.Empty;
+    public double Progress { get; set; }
+    public string ImagePath { get; set; } = string.Empty;
+    public string DurationText { get; set; } = string.Empty;
 }

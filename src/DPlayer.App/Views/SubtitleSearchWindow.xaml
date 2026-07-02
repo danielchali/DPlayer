@@ -4,7 +4,7 @@
         Style="{StaticResource DPlayerWindowStyle}"
         Title="Subtitle Search" Height="520" Width="720"
         WindowStartupLocation="CenterOwner"
-        Background="{StaticResource BackgroundBrush}">
+        Background="{DynamicResource BackgroundBrush}">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -30,23 +30,23 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,8">
-                    <TextBlock Text="Title" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock Text="Title" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                     <TextBox Style="{StaticResource DPlayerTextBoxStyle}" Text="{Binding SearchTitle, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,8">
-                    <TextBlock Text="Series" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock Text="Series" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                     <TextBox Style="{StaticResource DPlayerTextBoxStyle}" Text="{Binding SeriesTitle, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,8">
-                    <TextBlock Text="Season" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock Text="Season" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                     <TextBox Style="{StaticResource DPlayerTextBoxStyle}" Text="{Binding Season, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,8">
-                    <TextBlock Text="Episode" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock Text="Episode" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                     <TextBox Style="{StaticResource DPlayerTextBoxStyle}" Text="{Binding Episode, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0">
-                    <TextBlock Text="Language" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock Text="Language" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                     <TextBox Style="{StaticResource DPlayerTextBoxStyle}" Text="{Binding LanguageCode, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
                 <Button Grid.Row="2" Grid.Column="1" Content="Search" Style="{StaticResource AccentButtonStyle}"
@@ -69,19 +69,19 @@
                         <StackPanel>
                             <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
                             <TextBlock Text="{Binding Release}" FontSize="12"
-                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
                             <TextBlock Text="{Binding PreviewText}" FontSize="11" TextWrapping="Wrap"
-                                       Foreground="{StaticResource TextSecondaryBrush}" MaxHeight="40"/>
+                                       Foreground="{DynamicResource TextSecondaryBrush}" MaxHeight="40"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
                             <TextBlock Text="{Binding Language}" HorizontalAlignment="Right"
-                                       Foreground="{StaticResource AccentBrush}"/>
+                                       Foreground="{DynamicResource AccentBrush}"/>
                             <TextBlock HorizontalAlignment="Right" FontSize="12"
-                                       Foreground="{StaticResource TextSecondaryBrush}">
+                                       Foreground="{DynamicResource TextSecondaryBrush}">
                                 <Run Text="★"/><Run Text="{Binding Rating, StringFormat={}{0:F1}}"/>
                             </TextBlock>
                             <TextBlock Text="{Binding Provider}" FontSize="10"
-                                       Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Right"/>
+                                       Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right"/>
                         </StackPanel>
                     </Grid>
                 </DataTemplate>
