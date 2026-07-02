@@ -5,9 +5,11 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Themes/Colors.DarkGreen.xaml"/>
+                <ResourceDictionary Source="Themes/Colors.Modern.xaml"/>
                 <ResourceDictionary Source="Themes/Controls.xaml"/>
                 <ResourceDictionary Source="Themes/Animations.xaml"/>
+                <!-- Keep DarkGreen as fallback for other components -->
+                <ResourceDictionary Source="Themes/Colors.DarkGreen.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

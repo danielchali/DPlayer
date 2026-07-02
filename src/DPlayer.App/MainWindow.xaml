@@ -6,8 +6,8 @@
         xmlns:conv="clr-namespace:DPlayer.App.Converters"
         Style="{StaticResource DPlayerWindowStyle}"
         Title="{Binding Title}"
-        Height="720" Width="1280"
-        MinHeight="480" MinWidth="800"
+        Height="900" Width="1600"
+        MinHeight="600" MinWidth="1000"
         WindowStartupLocation="CenterScreen"
         Icon="pack://application:,,,/DPlayer;component/Assets/Dplayer.ico"
         WindowStyle="None"
@@ -36,7 +36,7 @@
     </Window.Resources>
 
     <Border x:Name="RootBorder"
-            Background="#080808"
+            Background="#0A0E27"
             CornerRadius="0"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
@@ -50,7 +50,7 @@
             </Grid.RowDefinitions>
 
             <!-- Custom Title Bar -->
-            <Border x:Name="TitleBar" Grid.Row="0" Background="#1D1D1D"
+            <Border x:Name="TitleBar" Grid.Row="0" Background="#1A1F3A"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -59,477 +59,429 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="7,0">
-                        <Button ToolTip="Player Menu"
-                                Click="PlayerMenu_Click"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Padding="0"
-                                Cursor="Hand">
-                            <TextBlock Text="DPlayer" FontWeight="SemiBold" FontSize="13"
-                                       Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <Button.ContextMenu>
-                                <ContextMenu Background="{StaticResource SurfaceBrush}"
-                                             DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                                             Foreground="{StaticResource TextPrimaryBrush}"
-                                             BorderBrush="{StaticResource BorderBrush}">
-                                    <MenuItem Header="Open File..." Command="{Binding OpenFileCommand}"/>
-                                    <MenuItem Header="Open URL..." Command="{Binding OpenUrlCommand}"/>
-                                    <MenuItem Header="Open Folder..." Command="{Binding OpenFolderCommand}"/>
-                                    <Separator/>
-                                    <MenuItem Header="Library" Command="{Binding ToggleLibraryPanelCommand}"/>
-                                    <MenuItem Header="Playlist" Command="{Binding TogglePlaylistPanelCommand}"/>
-                                    <MenuItem Header="Subtitle Search" Command="{Binding OpenSubtitleSearchCommand}"/>
-                                    <Separator/>
-                                    <MenuItem Header="Settings" Command="{Binding OpenSettingsCommand}"/>
-                                    <MenuItem Header="Media Info" Command="{Binding ShowMediaInfoCommand}"/>
-                                </ContextMenu>
-                            </Button.ContextMenu>
-                        </Button>
+                    <!-- Logo -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="15,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="▶" FontSize="16" Foreground="#FF1493" FontWeight="Bold" Margin="0,0,8,0"/>
+                        <TextBlock Text="DPlayer" FontWeight="Bold" FontSize="14"
+                                   Foreground="#FFFFFF" VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <TextBlock Grid.Column="1" Text="{Binding CurrentFileName}"
-                               Foreground="{StaticResource TextSecondaryBrush}"
-                               FontSize="12" VerticalAlignment="Center"
-                               HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    <!-- Search Bar -->
+                    <Grid Grid.Column="1" Margin="30,0" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🔍" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox Grid.Column="1" 
+                                 Style="{StaticResource DPlayerTextBoxStyle}"
+                                 Foreground="#FFFFFF"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Text="Search videos, episodes, subtitles..."
+                                 Padding="0,5"/>
+                    </Grid>
 
-                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <!-- Title Bar Buttons -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,10,0">
+                        <Button Style="{StaticResource TitleBarButtonStyle}" Content="👑" ToolTip="Upgrade" Margin="0,0,10,0"/>
+                        <Button Style="{StaticResource TitleBarButtonStyle}" Content="⚙️" ToolTip="Settings" Margin="0,0,10,0"/>
+                        <Button Style="{StaticResource TitleBarButtonStyle}" Content="📱" ToolTip="Mobile" Margin="0,0,10,0"/>
+                        <Button Style="{StaticResource TitleBarButtonStyle}" Content="📋" ToolTip="Fullscreen" Margin="0,0,10,0"/>
                         <Button Style="{StaticResource TitleBarButtonStyle}" Content="&#xE921;"
-                                Click="Minimize_Click" ToolTip="Minimize"/>
+                                Click="Minimize_Click" ToolTip="Minimize" Margin="0,0,10,0"/>
                         <Button x:Name="MaximizeButton" Style="{StaticResource TitleBarButtonStyle}" Content="&#xE922;"
-                                Click="Maximize_Click" ToolTip="Maximize"/>
+                                Click="Maximize_Click" ToolTip="Maximize" Margin="0,0,10,0"/>
                         <Button Style="{StaticResource CloseButtonStyle}" Content="&#xE8BB;"
                                 Click="Close_Click" ToolTip="Close"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Main Content -->
+            <!-- Main Content with Sidebar -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="320"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Video Area -->
-                <Grid Grid.Column="0" Background="#000000"
-                      MouseMove="VideoArea_MouseMove"
-                      MouseLeftButtonDown="VideoArea_MouseLeftButtonDown">
-                    <Grid.ContextMenu>
-                        <ContextMenu Background="{StaticResource SurfaceBrush}"
-                                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                                     Foreground="{StaticResource TextPrimaryBrush}"
-                                     BorderBrush="{StaticResource BorderBrush}">
-                            <MenuItem Header="Play / Pause" Command="{Binding TogglePlayPauseCommand}"/>
-                            <MenuItem Header="Open URL..." Command="{Binding OpenUrlCommand}"/>
-                            <Separator/>
-                            <MenuItem Header="Video">
-                                <MenuItem Header="Brightness / Contrast / Saturation" Command="{Binding OpenSettingsCommand}"/>
-                                <MenuItem Header="Aspect Ratio">
-                                    <MenuItem Header="Auto" Command="{Binding SetAspectRatioCommand}" CommandParameter="Auto"/>
-                                    <MenuItem Header="16:9" Command="{Binding SetAspectRatioCommand}" CommandParameter="Ratio16x9"/>
-                                    <MenuItem Header="4:3" Command="{Binding SetAspectRatioCommand}" CommandParameter="Ratio4x3"/>
-                                    <MenuItem Header="21:9" Command="{Binding SetAspectRatioCommand}" CommandParameter="Ratio21x9"/>
-                                    <MenuItem Header="Fill" Command="{Binding SetAspectRatioCommand}" CommandParameter="Fill"/>
-                                    <MenuItem Header="Stretch" Command="{Binding SetAspectRatioCommand}" CommandParameter="Stretch"/>
-                                </MenuItem>
-                                <MenuItem Header="Rotate Video" Command="{Binding OpenSettingsCommand}"/>
-                                <MenuItem Header="Screenshot" Command="{Binding TakeScreenshotCommand}"/>
-                                <MenuItem Header="Media Info" Command="{Binding ShowMediaInfoCommand}"/>
-                            </MenuItem>
-                            <MenuItem Header="Audio">
-                                <MenuItem Header="{Binding SelectedAudioTrackText}" Command="{Binding CycleAudioTrackCommand}"/>
-                                <MenuItem Header="Audio Tracks" ItemsSource="{Binding AudioTracks}">
-                                    <MenuItem.ItemContainerStyle>
-                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
-                                            <Setter Property="Header" Value="{Binding Label}"/>
-                                            <Setter Property="Command" Value="{Binding DataContext.SelectAudioTrackCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"/>
-                                            <Setter Property="CommandParameter" Value="{Binding Index}"/>
-                                        </Style>
-                                    </MenuItem.ItemContainerStyle>
-                                </MenuItem>
-                                <Separator/>
-                                <MenuItem Header="Audio Delay +50 ms" Command="{Binding AdjustAudioDelayCommand}" CommandParameter="50"/>
-                                <MenuItem Header="Audio Delay -50 ms" Command="{Binding AdjustAudioDelayCommand}" CommandParameter="-50"/>
-                                <MenuItem Header="Reset A/V Sync" Command="{Binding ResetAvSyncCommand}"/>
-                                <Separator/>
-                                <MenuItem Header="Audio Settings" Command="{Binding OpenSettingsCommand}"/>
-                            </MenuItem>
-                            <MenuItem Header="Subtitle">
-                                <MenuItem Header="{Binding SelectedSubtitleTrackText}" Command="{Binding CycleSubtitleTrackCommand}"/>
-                                <MenuItem Header="Subtitle Off" Command="{Binding SelectSubtitleTrackCommand}" CommandParameter="-1"/>
-                                <MenuItem Header="Subtitle Tracks" ItemsSource="{Binding SubtitleTracks}">
-                                    <MenuItem.ItemContainerStyle>
-                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
-                                            <Setter Property="Header" Value="{Binding Label}"/>
-                                            <Setter Property="Command" Value="{Binding DataContext.SelectSubtitleTrackCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"/>
-                                            <Setter Property="CommandParameter" Value="{Binding Index}"/>
-                                        </Style>
-                                    </MenuItem.ItemContainerStyle>
-                                </MenuItem>
-                                <MenuItem Header="Search &amp; Download" Command="{Binding OpenSubtitleSearchCommand}"/>
-                                <MenuItem Header="Load External..." Command="{Binding LoadSubtitleCommand}"/>
-                                <Separator/>
-                                <MenuItem Header="Subtitle Delay +50 ms" Command="{Binding AdjustSubtitleDelayCommand}" CommandParameter="50"/>
-                                <MenuItem Header="Subtitle Delay -50 ms" Command="{Binding AdjustSubtitleDelayCommand}" CommandParameter="-50"/>
-                                <MenuItem Header="Reset A/V Sync" Command="{Binding ResetAvSyncCommand}"/>
-                            </MenuItem>
-                            <MenuItem Header="Playback">
-                                <MenuItem Header="0.25x" Command="{Binding SetPlaybackSpeedCommand}" CommandParameter="0.25"/>
-                                <MenuItem Header="0.5x" Command="{Binding SetPlaybackSpeedCommand}" CommandParameter="0.5"/>
-                                <MenuItem Header="1.0x" Command="{Binding SetPlaybackSpeedCommand}" CommandParameter="1"/>
-                                <MenuItem Header="1.5x" Command="{Binding SetPlaybackSpeedCommand}" CommandParameter="1.5"/>
-                                <MenuItem Header="2.0x" Command="{Binding SetPlaybackSpeedCommand}" CommandParameter="2"/>
-                                <MenuItem Header="4.0x" Command="{Binding SetPlaybackSpeedCommand}" CommandParameter="4"/>
-                            </MenuItem>
-                            <Separator/>
-                            <MenuItem Header="AB Repeat">
-                                <MenuItem Header="Set Point A" Command="{Binding SetAbPointACommand}"/>
-                                <MenuItem Header="Set Point B" Command="{Binding SetAbPointBCommand}"/>
-                                <MenuItem Header="Clear" Command="{Binding ClearAbRepeatCommand}"/>
-                            </MenuItem>
-                            <MenuItem Header="Fullscreen" Command="{Binding ToggleFullscreenCommand}"/>
-                        </ContextMenu>
-                    </Grid.ContextMenu>
-                    <vlc:VideoView x:Name="VideoView"
-                                   Background="#000000"
-                                   MouseLeftButtonDown="VideoView_MouseLeftButtonDown"/>
+                <!-- Left Sidebar Navigation -->
+                <Border Grid.Column="0" Background="#0F1428" BorderBrush="#1A2847" BorderThickness="0,0,1,0">
+                    <StackPanel Margin="0,20,0,0">
+                        <!-- Navigation Items -->
+                        <Button Content="🏠 Home" Style="{StaticResource NavButtonStyle}" 
+                                Command="{Binding OpenFileCommand}" Margin="10,8"/>
+                        <Button Content="📚 Library" Style="{StaticResource NavButtonStyle}" 
+                                Command="{Binding ToggleLibraryPanelCommand}" Margin="10,8"/>
+                        <Button Content="▶️ Playlist" Style="{StaticResource NavButtonStyle}" 
+                                Command="{Binding TogglePlaylistPanelCommand}" Margin="10,8"/>
+                        <Button Content="❤️ Favorites" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
+                        <Button Content="🕐 Recent" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
+                        <Button Content="⬇️ Downloads" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
+                        <Button Content="⏱️ Watch Later" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
 
-                    <!-- Drop overlay hint -->
-                    <Border Background="#80000000" Visibility="Collapsed" x:Name="DropOverlay">
-                        <TextBlock Text="Drop media or subtitle files here"
-                                   Foreground="{StaticResource AccentLightBrush}"
-                                   FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
+                        <Separator Margin="10,15" Background="#1A2847"/>
 
-                    <!-- Idle center mark -->
-                    <Border Background="#000000"
-                            Visibility="{Binding CurrentFileName, Converter={StaticResource BoolToVis}, ConverterParameter=inverse}">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="DPlayer" FontSize="29" FontWeight="Bold"
-                                       Foreground="#363636" HorizontalAlignment="Center"/>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-                                <Button Content="Open File" Style="{StaticResource KmPillButtonStyle}"
-                                        Command="{Binding OpenFileCommand}" Margin="0,0,8,0"/>
-                                <Button Content="Open URL" Style="{StaticResource KmPillButtonStyle}"
-                                        Command="{Binding OpenUrlCommand}" Margin="0,0,8,0"/>
-                                <Button Content="Library" Style="{StaticResource KmPillButtonStyle}"
-                                        Command="{Binding ToggleLibraryPanelCommand}"/>
+                        <!-- Tools Section -->
+                        <TextBlock Text="TOOLS" Foreground="#8B949E" FontSize="11" FontWeight="Bold" Margin="15,10,0,5"/>
+                        <Button Content="📖 Study Mode" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
+                        <Button Content="🎯 AI Subtitles" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
+
+                        <!-- Storage Info -->
+                        <Border Background="#1A2847" Margin="10,20,10,0" Padding="10" CornerRadius="6">
+                            <StackPanel>
+                                <TextBlock Text="Storage" Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" Margin="0,0,0,8"/>
+                                <ProgressBar Height="6" Background="#2A3F5F" Foreground="#00D9FF" Value="50"/>
+                                <TextBlock Text="256 GB / 512 GB" Foreground="#8B949E" FontSize="10" Margin="0,5,0,0"/>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- On-screen display -->
-                    <Border Background="#B0000000"
-                            CornerRadius="6"
-                            Padding="18,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Visibility="{Binding IsOsdVisible, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="{Binding OsdText}"
-                                   Foreground="White"
-                                   FontSize="18"
-                                   FontWeight="SemiBold"/>
-                    </Border>
-                </Grid>
-
-                <!-- Side Panel (Playlist / Subtitles) -->
-                <Border Grid.Column="1" Width="{StaticResource SidePanelWidth}"
-                        Background="{StaticResource SurfaceBrush}"
-                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0"
-                        Visibility="{Binding IsPlaylistPanelOpen, Converter={StaticResource BoolToVis}}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <Border Grid.Row="0" Padding="12,8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-                            <Grid>
-                                <TextBlock Text="Playlist" FontWeight="SemiBold" FontSize="14"/>
-                                <Button Content="&#xE711;" Style="{StaticResource IconButtonStyle}"
-                                        HorizontalAlignment="Right" Width="28" Height="28"
-                                        Command="{Binding TogglePlaylistPanelCommand}"/>
-                            </Grid>
                         </Border>
-
-                        <Grid Grid.Row="1" DataContext="{Binding PlaylistVm}">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-
-                            <WrapPanel Grid.Row="0" Margin="8">
-                                <Button Content="+" Style="{StaticResource AccentButtonStyle}"
-                                        Command="{Binding CreatePlaylistCommand}" Margin="0,0,4,0" Padding="10,4"/>
-                                <Button Content="Add" Style="{StaticResource TextButtonStyle}"
-                                        Command="{Binding AddFileCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
-                                <Button Content="Import" Style="{StaticResource TextButtonStyle}"
-                                        Command="{Binding ImportPlaylistCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
-                                <Button Content="Export" Style="{StaticResource TextButtonStyle}"
-                                        Command="{Binding ExportPlaylistCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
-                                <Button Content="Use" Style="{StaticResource TextButtonStyle}"
-                                        Command="{Binding ActivatePlaylistCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
-                                <Button Content="Up" Style="{StaticResource TextButtonStyle}"
-                                        Command="{Binding MoveSelectedUpCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
-                                <Button Content="Down" Style="{StaticResource TextButtonStyle}"
-                                        Command="{Binding MoveSelectedDownCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
-                                <Button Content="Remove" Style="{StaticResource TextButtonStyle}"
-                                        Command="{Binding RemoveEntryCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
-                                <Button Content="Clear" Style="{StaticResource TextButtonStyle}"
-                                        Command="{Binding ClearPlaylistCommand}" Width="Auto" Padding="8,4" Margin="0,0,4,4"/>
-                            </WrapPanel>
-
-                            <ComboBox Grid.Row="1" Style="{StaticResource DPlayerComboBoxStyle}"
-                                      ItemsSource="{Binding Playlists}"
-                                      SelectedItem="{Binding SelectedPlaylist}"
-                                      DisplayMemberPath="Name"
-                                      Margin="8,0,8,8"/>
-
-                            <ListBox Grid.Row="2" Style="{StaticResource DPlayerListBoxStyle}"
-                                     ItemContainerStyle="{StaticResource DPlayerListBoxItemStyle}"
-                                     ItemsSource="{Binding SelectedPlaylist.Items}"
-                                     SelectedItem="{Binding SelectedEntry}"
-                                     MouseDoubleClick="PlaylistItems_MouseDoubleClick"
-                                     Margin="4">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Text="{Binding FilePath}" FontSize="11"
-                                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                                       TextTrimming="CharacterEllipsis"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Grid>
-                    </Grid>
+                    </StackPanel>
                 </Border>
 
-                <!-- Side Panel (Library) -->
-                <Border Grid.Column="1" Width="{StaticResource SidePanelWidth}"
-                        Background="{StaticResource SurfaceBrush}"
-                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0"
-                        Visibility="{Binding IsLibraryPanelOpen, Converter={StaticResource BoolToVis}}">
-                    <Grid DataContext="{Binding LibraryVm}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <Border Grid.Row="0" Padding="12,8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-                            <Grid>
-                                <TextBlock Text="Library" FontWeight="SemiBold" FontSize="14"/>
-                                <Button Content="&#xE711;" Style="{StaticResource IconButtonStyle}"
-                                        HorizontalAlignment="Right" Width="28" Height="28"
-                                        Command="{Binding DataContext.ToggleLibraryPanelCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                            </Grid>
-                        </Border>
-
-                        <Grid Grid.Row="1" Margin="8">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBox Grid.Row="0" Grid.Column="0" Style="{StaticResource DPlayerTextBoxStyle}"
-                                     Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                     ToolTip="Search indexed media"/>
-                            <Button Grid.Row="0" Grid.Column="1" Content="Search" Style="{StaticResource TextButtonStyle}"
-                                    Command="{Binding SearchCommand}" Width="Auto" Padding="10,4" Margin="6,0,0,0"/>
-                            <Button Grid.Row="1" Grid.ColumnSpan="2" Content="Scan Folder" Style="{StaticResource AccentButtonStyle}"
-                                    Command="{Binding ScanFolderCommand}" Margin="0,8,0,0"/>
-                        </Grid>
-
-                        <TabControl Grid.Row="2" Margin="4" Background="Transparent" BorderThickness="0">
-                            <TabItem Header="Results">
-                                <ListBox Style="{StaticResource DPlayerListBoxStyle}"
-                                         ItemContainerStyle="{StaticResource DPlayerListBoxItemStyle}"
-                                         ItemsSource="{Binding SearchResults}"
-                                         MouseDoubleClick="LibraryItems_MouseDoubleClick">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Text="{Binding FilePath}" FontSize="11"
-                                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </TabItem>
-                            <TabItem Header="Recent">
-                                <ListBox Style="{StaticResource DPlayerListBoxStyle}"
-                                         ItemContainerStyle="{StaticResource DPlayerListBoxItemStyle}"
-                                         ItemsSource="{Binding RecentFiles}"
-                                         MouseDoubleClick="LibraryItems_MouseDoubleClick">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Text="{Binding FilePath}" FontSize="11"
-                                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </TabItem>
-                            <TabItem Header="Favorites">
-                                <ListBox Style="{StaticResource DPlayerListBoxStyle}"
-                                         ItemContainerStyle="{StaticResource DPlayerListBoxItemStyle}"
-                                         ItemsSource="{Binding Favorites}"
-                                         MouseDoubleClick="LibraryItems_MouseDoubleClick">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Text="{Binding FilePath}" FontSize="11"
-                                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </TabItem>
-                            <TabItem Header="Later">
-                                <ListBox Style="{StaticResource DPlayerListBoxStyle}"
-                                         ItemContainerStyle="{StaticResource DPlayerListBoxItemStyle}"
-                                         ItemsSource="{Binding WatchLater}"
-                                         MouseDoubleClick="LibraryItems_MouseDoubleClick">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Text="{Binding FilePath}" FontSize="11"
-                                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </TabItem>
-                        </TabControl>
-                    </Grid>
-                </Border>
-            </Grid>
-
-            <!-- Control Bar -->
-            <Border Grid.Row="2" Background="#1B1B1B"
-                    BorderBrush="#292929" BorderThickness="0,1,0,0"
-                    Padding="8,5"
-                    Visibility="{Binding IsControlsVisible, Converter={StaticResource BoolToVis}}">
-                <Grid>
+                <!-- Center Main Content Area -->
+                <Grid Grid.Column="1" Background="#0A0E27">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Seek Bar -->
-                    <Grid Grid.Row="0" Margin="0,0,0,3">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding Position, Converter={StaticResource TimeFormat}}"
-                                   Foreground="#858585" FontSize="12"
-                                   VerticalAlignment="Center" Margin="0,0,8,0" FontFamily="{StaticResource MonoFont}"/>
-                        <Slider Grid.Column="1" Style="{StaticResource SeekSliderStyle}"
-                                Minimum="0" Maximum="{Binding Duration.TotalSeconds}"
-                                Value="{Binding Position.TotalSeconds, Mode=OneWay}"
-                                PreviewMouseLeftButtonDown="SeekSlider_PreviewMouseLeftButtonDown"
-                                PreviewMouseLeftButtonUp="SeekSlider_PreviewMouseLeftButtonUp"
-                                PreviewKeyUp="SeekSlider_PreviewKeyUp"
-                                ValueChanged="SeekSlider_ValueChanged"/>
-                        <TextBlock Grid.Column="2" Text="{Binding Duration, Converter={StaticResource TimeFormat}}"
-                                   Foreground="#858585" FontSize="12"
-                                   VerticalAlignment="Center" Margin="8,0,0,0" FontFamily="{StaticResource MonoFont}"/>
+                    <!-- Video Area / Hero Section -->
+                    <Grid Grid.Row="0" Background="#000000"
+                          MouseMove="VideoArea_MouseMove"
+                          MouseLeftButtonDown="VideoArea_MouseLeftButtonDown">
+                        <Grid.ContextMenu>
+                            <ContextMenu Background="{StaticResource SurfaceBrush}"
+                                         DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                         Foreground="{StaticResource TextPrimaryBrush}"
+                                         BorderBrush="{StaticResource BorderBrush}">
+                                <MenuItem Header="Play / Pause" Command="{Binding TogglePlayPauseCommand}"/>
+                                <MenuItem Header="Open URL..." Command="{Binding OpenUrlCommand}"/>
+                                <Separator/>
+                                <MenuItem Header="Fullscreen" Command="{Binding ToggleFullscreenCommand}"/>
+                            </ContextMenu>
+                        </Grid.ContextMenu>
+
+                        <!-- Video View -->
+                        <vlc:VideoView x:Name="VideoView"
+                                       Background="#000000"
+                                       MouseLeftButtonDown="VideoView_MouseLeftButtonDown"
+                                       Visibility="{Binding CurrentFileName, Converter={StaticResource BoolToVis}}"/>
+
+                        <!-- Hero Section (when idle) -->
+                        <ScrollViewer Visibility="{Binding CurrentFileName, Converter={StaticResource BoolToVis}, ConverterParameter=inverse}"
+                                      VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="40,30">
+                                <!-- Hero Title -->
+                                <StackPanel HorizontalAlignment="Center" Margin="0,40,0,60">
+                                    <TextBlock Text="DPlayer" FontSize="72" FontWeight="Bold"
+                                               Foreground="#FFFFFF" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="A Smart Player for Your Videos" FontSize="24"
+                                               Foreground="#00D9FF" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                                    <TextBlock Text="Play. Understand. Learn." FontSize="18"
+                                               Foreground="#8B949E" HorizontalAlignment="Center" Margin="0,15,0,0"/>
+                                </StackPanel>
+
+                                <!-- Action Cards -->
+                                <Grid Margin="0,0,0,40">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Open File Card -->
+                                    <Border Grid.Column="0" Background="#1A2847" CornerRadius="12" Margin="10"
+                                            Padding="20" Cursor="Hand">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenFileCommand}"/>
+                                        </Border.InputBindings>
+                                        <StackPanel>
+                                            <TextBlock Text="📁" FontSize="32" Margin="0,0,0,10"/>
+                                            <TextBlock Text="Open File" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,5"/>
+                                            <TextBlock Text="Play local videos" FontSize="12" Foreground="#8B949E"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Open URL Card -->
+                                    <Border Grid.Column="1" Background="#1A2847" CornerRadius="12" Margin="10"
+                                            Padding="20" Cursor="Hand">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenUrlCommand}"/>
+                                        </Border.InputBindings>
+                                        <StackPanel>
+                                            <TextBlock Text="🌐" FontSize="32" Margin="0,0,0,10"/>
+                                            <TextBlock Text="Open URL" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,5"/>
+                                            <TextBlock Text="Stream from the web" FontSize="12" Foreground="#8B949E"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Library Card -->
+                                    <Border Grid.Column="2" Background="#FF6B35" CornerRadius="12" Margin="10"
+                                            Padding="20" Cursor="Hand">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding ToggleLibraryPanelCommand}"/>
+                                        </Border.InputBindings>
+                                        <StackPanel>
+                                            <TextBlock Text="🎬" FontSize="32" Margin="0,0,0,10"/>
+                                            <TextBlock Text="Library" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,5"/>
+                                            <TextBlock Text="Your media collection" FontSize="12" Foreground="#FFFFFF" Opacity="0.8"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                                <!-- Continue Watching Section -->
+                                <TextBlock Text="Continue Watching" FontSize="18" FontWeight="Bold" 
+                                           Foreground="#FFFFFF" Margin="0,0,0,20"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Video Thumbnail 1 -->
+                                    <Border Grid.Column="0" Background="#1A2847" CornerRadius="8" Margin="10"
+                                            Height="180">
+                                        <Grid>
+                                            <Image Source="pack://application:,,,/DPlayer;component/Assets/Dplayer.ico" 
+                                                   Stretch="UniformToFill"/>
+                                            <StackPanel VerticalAlignment="Bottom" Background="#00000080" Padding="10">
+                                                <TextBlock Text="Nature Documentary.mp4" FontSize="12" 
+                                                           Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                                <ProgressBar Height="4" Background="#333333" Foreground="#00D9FF" 
+                                                             Value="43" Margin="0,5,0,0"/>
+                                                <TextBlock Text="43% watched" FontSize="10" Foreground="#8B949E" Margin="0,3,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Video Thumbnail 2 -->
+                                    <Border Grid.Column="1" Background="#1A2847" CornerRadius="8" Margin="10"
+                                            Height="180">
+                                        <Grid>
+                                            <Image Source="pack://application:,,,/DPlayer;component/Assets/Dplayer.ico" 
+                                                   Stretch="UniformToFill"/>
+                                            <StackPanel VerticalAlignment="Bottom" Background="#00000080" Padding="10">
+                                                <TextBlock Text="City Lights.mp4" FontSize="12" 
+                                                           Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                                <ProgressBar Height="4" Background="#333333" Foreground="#00D9FF" 
+                                                             Value="67" Margin="0,5,0,0"/>
+                                                <TextBlock Text="67% watched" FontSize="10" Foreground="#8B949E" Margin="0,3,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Video Thumbnail 3 -->
+                                    <Border Grid.Column="2" Background="#1A2847" CornerRadius="8" Margin="10"
+                                            Height="180">
+                                        <Grid>
+                                            <Image Source="pack://application:,,,/DPlayer;component/Assets/Dplayer.ico" 
+                                                   Stretch="UniformToFill"/>
+                                            <StackPanel VerticalAlignment="Bottom" Background="#00000080" Padding="10">
+                                                <TextBlock Text="Anime Movie.mp4" FontSize="12" 
+                                                           Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                                <ProgressBar Height="4" Background="#333333" Foreground="#00D9FF" 
+                                                             Value="51" Margin="0,5,0,0"/>
+                                                <TextBlock Text="51% watched" FontSize="10" Foreground="#8B949E" Margin="0,3,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Video Thumbnail 4 -->
+                                    <Border Grid.Column="3" Background="#1A2847" CornerRadius="8" Margin="10"
+                                            Height="180">
+                                        <Grid>
+                                            <Image Source="pack://application:,,,/DPlayer;component/Assets/Dplayer.ico" 
+                                                   Stretch="UniformToFill"/>
+                                            <StackPanel VerticalAlignment="Bottom" Background="#00000080" Padding="10">
+                                                <TextBlock Text="Ocean Life.mp4" FontSize="12" 
+                                                           Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                                <ProgressBar Height="4" Background="#333333" Foreground="#00D9FF" 
+                                                             Value="28" Margin="0,5,0,0"/>
+                                                <TextBlock Text="28% watched" FontSize="10" Foreground="#8B949E" Margin="0,3,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <!-- OSD Display -->
+                        <Border Background="#000000CC" CornerRadius="6" Padding="18,10"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{Binding IsOsdVisible, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="{Binding OsdText}" Foreground="White" FontSize="18" FontWeight="SemiBold"/>
+                        </Border>
                     </Grid>
 
-                    <!-- Transport Controls -->
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Control Bar -->
+                    <Border Grid.Row="1" Background="#1A1F3A" BorderBrush="#2A3F5F" BorderThickness="0,1,0,0"
+                            Padding="8,5" Visibility="{Binding IsControlsVisible, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                        <!-- Left controls -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE8E5;"
-                                    Command="{Binding OpenFileCommand}" ToolTip="Open File (Ctrl+O)"/>
-                            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE71B;"
-                                    Command="{Binding OpenUrlCommand}" ToolTip="Open URL (Ctrl+U)"/>
-                            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE721;"
-                                    Command="{Binding OpenSubtitleSearchCommand}" ToolTip="Search Subtitles (Ctrl+S)"/>
-                            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE8FD;"
-                                    Command="{Binding TogglePlaylistPanelCommand}" ToolTip="Playlist (L)"/>
-                            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE80F;"
-                                    Command="{Binding ToggleLibraryPanelCommand}" ToolTip="Library"/>
-                            <TextBlock Text="{Binding PlaybackSpeedText}" Foreground="#858585"
-                                       VerticalAlignment="Center" Margin="7,0" FontSize="11" FontWeight="SemiBold"
-                                       Cursor="Hand" MouseLeftButtonUp="SpeedText_Click"/>
-                        </StackPanel>
+                            <!-- Seek Bar -->
+                            <Grid Grid.Row="0" Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding Position, Converter={StaticResource TimeFormat}}"
+                                           Foreground="#8B949E" FontSize="12" VerticalAlignment="Center" 
+                                           Margin="0,0,8,0" FontFamily="{StaticResource MonoFont}"/>
+                                <Slider Grid.Column="1" Style="{StaticResource SeekSliderStyle}"
+                                        Minimum="0" Maximum="{Binding Duration.TotalSeconds}"
+                                        Value="{Binding Position.TotalSeconds, Mode=OneWay}"/>
+                                <TextBlock Grid.Column="2" Text="{Binding Duration, Converter={StaticResource TimeFormat}}"
+                                           Foreground="#8B949E" FontSize="12" VerticalAlignment="Center" 
+                                           Margin="8,0,0,0" FontFamily="{StaticResource MonoFont}"/>
+                            </Grid>
 
-                        <!-- Center transport -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Style="{StaticResource TransportButtonStyle}" Content="&#xE8E5;"
-                                    Command="{Binding OpenFileCommand}" ToolTip="Open File"/>
-                            <Button Style="{StaticResource TransportButtonStyle}" Content="&#xE892;"
-                                    Command="{Binding PlayPreviousCommand}" ToolTip="Previous"/>
-                            <Button Style="{StaticResource PlayButtonStyle}"
-                                    Content="{Binding PlaybackState, Converter={StaticResource PlayIcon}}"
-                                    FontFamily="Segoe MDL2 Assets" FontSize="16"
-                                    Command="{Binding TogglePlayPauseCommand}" ToolTip="Play/Pause (Space)"/>
-                            <Button Style="{StaticResource TransportButtonStyle}" Content="&#xE893;"
-                                    Command="{Binding PlayNextCommand}" ToolTip="Next"/>
-                            <Button Style="{StaticResource TransportButtonStyle}" Content="&#xE71A;"
-                                    Command="{Binding StopCommand}" ToolTip="Stop"/>
-                        </StackPanel>
+                            <!-- Control Buttons -->
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- Right controls -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <Button Style="{StaticResource IconButtonStyle}"
-                                    Command="{Binding ToggleShuffleCommand}" ToolTip="Shuffle">
-                                <TextBlock Text="&#xE8B1;">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Opacity" Value="0.4"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsShuffle}" Value="True">
-                                                    <Setter Property="Opacity" Value="1"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Button>
-                            <Button Style="{StaticResource IconButtonStyle}"
-                                    Command="{Binding ToggleLoopCommand}" ToolTip="Loop">
-                                <TextBlock Text="&#xE8EE;"/>
-                            </Button>
-                            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE7B3;"
-                                    Command="{Binding TakeScreenshotCommand}" ToolTip="Screenshot"/>
-                            <Button x:Name="FullscreenButton" Style="{StaticResource IconButtonStyle}" Content="&#xE740;"
-                                    Command="{Binding ToggleFullscreenCommand}" ToolTip="Fullscreen (F)"/>
-                            <Button Style="{StaticResource IconButtonStyle}"
-                                    Content="{Binding IsMuted, Converter={StaticResource MuteIcon}}"
-                                    Command="{Binding ToggleMuteCommand}" ToolTip="Mute (M)"/>
-                            <Slider Style="{StaticResource VolumeSliderStyle}" Minimum="0" Maximum="100"
-                                    Value="{Binding Volume, Mode=TwoWay}" Margin="4,0"/>
-                        </StackPanel>
-                    </Grid>
+                                <Button Grid.Column="0" Content="{Binding IsPlaying, Converter={StaticResource PlayIcon}}"
+                                        Style="{StaticResource IconButtonStyle}" Command="{Binding TogglePlayPauseCommand}"
+                                        Margin="0,0,8,0" Width="32" Height="32"/>
+                                <Button Grid.Column="1" Content="⏭️" Style="{StaticResource IconButtonStyle}"
+                                        Command="{Binding NextCommand}" Margin="0,0,8,0" Width="32" Height="32"/>
+                                <Button Grid.Column="2" Content="🔊" Style="{StaticResource IconButtonStyle}"
+                                        Margin="0,0,8,0" Width="32" Height="32"/>
+
+                                <Slider Grid.Column="3" Margin="8,0" VerticalAlignment="Center"
+                                        Minimum="0" Maximum="100" Value="70" Height="4"/>
+
+                                <TextBlock Grid.Column="4" Text="1.0x" Foreground="#8B949E" FontSize="12"
+                                           VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                <Button Grid.Column="5" Content="CC" Style="{StaticResource IconButtonStyle}"
+                                        Margin="0,0,8,0" Width="32" Height="32"/>
+                                <Button Grid.Column="6" Content="⛶" Style="{StaticResource IconButtonStyle}"
+                                        Command="{Binding ToggleFullscreenCommand}" Width="32" Height="32"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
                 </Grid>
-            </Border>
+
+                <!-- Right Panel - Smart Features -->
+                <Border Grid.Column="2" Background="#0F1428" BorderBrush="#1A2847" BorderThickness="1,0,0,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="15,20">
+                            <!-- AI Subtitles Card -->
+                            <Border Background="#1A2847" CornerRadius="10" Padding="15" Margin="0,0,0,15">
+                                <StackPanel>
+                                    <TextBlock Text="🎯 AI Subtitles" FontSize="14" FontWeight="Bold" 
+                                               Foreground="#FFFFFF" Margin="0,0,0,10"/>
+                                    <TextBlock Text="Find, generate or create live subtitles" FontSize="11" 
+                                               Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                    <Button Content="Get Subtitles" Background="#00D9FF" Foreground="#000000" 
+                                            FontWeight="Bold" Padding="10,8" CornerRadius="6"
+                                            Command="{Binding OpenSubtitleSearchCommand}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Study Mode Card -->
+                            <Border Background="#1A2847" CornerRadius="10" Padding="15" Margin="0,0,0,15">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <TextBlock Text="📖 Study Mode" FontSize="14" FontWeight="Bold" 
+                                                   Foreground="#FFFFFF"/>
+                                        <TextBlock Text="NEW" FontSize="10" FontWeight="Bold" 
+                                                   Foreground="#FF6B35" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBlock Text="Ask the video. Find answers. Save time." FontSize="11" 
+                                               Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                    <Button Content="Start Study Mode" Background="#FF6B35" Foreground="#FFFFFF" 
+                                            FontWeight="Bold" Padding="10,8" CornerRadius="6"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Smart Features Section -->
+                            <TextBlock Text="Smart Features" FontSize="13" FontWeight="Bold" 
+                                       Foreground="#FFFFFF" Margin="0,0,0,12"/>
+
+                            <!-- Feature Items -->
+                            <StackPanel Margin="0,0,0,10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="🎤" FontSize="16" Margin="0,0,10,0"/>
+                                    <StackPanel>
+                                        <TextBlock Text="AI Translations &amp; Dubbing" FontSize="12" 
+                                                   Foreground="#FFFFFF" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Watch in any language" FontSize="10" 
+                                                   Foreground="#8B949E"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="📺" FontSize="16" Margin="0,0,10,0"/>
+                                    <StackPanel>
+                                        <TextBlock Text="Smart Episode Detection" FontSize="12" 
+                                                   Foreground="#FFFFFF" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Always in the right order" FontSize="10" 
+                                                   Foreground="#8B949E"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="📝" FontSize="16" Margin="0,0,10,0"/>
+                                    <StackPanel>
+                                        <TextBlock Text="AI Summaries" FontSize="12" 
+                                                   Foreground="#FFFFFF" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Summarize any video" FontSize="10" 
+                                                   Foreground="#8B949E"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="⏱️" FontSize="16" Margin="0,0,10,0"/>
+                                    <StackPanel>
+                                        <TextBlock Text="Timestamp Search" FontSize="12" 
+                                                   Foreground="#FFFFFF" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Jump to what matters" FontSize="10" 
+                                                   Foreground="#8B949E"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="❓" FontSize="16" Margin="0,0,10,0"/>
+                                    <StackPanel>
+                                        <TextBlock Text="Ask the Video" FontSize="12" 
+                                                   Foreground="#FFFFFF" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Chat with your content" FontSize="10" 
+                                                   Foreground="#8B949E"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <TextBlock Text="See all features" FontSize="11" Foreground="#00D9FF" 
+                                       Margin="0,10,0,0" Cursor="Hand" TextDecoration="Underline"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
         </Grid>
     </Border>
 </Window>
