@@ -36,14 +36,9 @@
     </Window.Resources>
 
     <Border x:Name="RootBorder"
-<<<<<<< Updated upstream
-            Background="#0A0E27"
-            CornerRadius="0"
-=======
-            Background="{StaticResource BackgroundBrush}"
+            Background="{DynamicResource BackgroundBrush}"
             CornerRadius="12"
->>>>>>> Stashed changes
-            BorderBrush="{StaticResource BorderBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="1"
             ClipToBounds="True">
         <Grid>
@@ -54,25 +49,9 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-<<<<<<< Updated upstream
-            <!-- Custom Title Bar -->
-            <Border x:Name="TitleBar" Grid.Row="0" Background="#1A1F3A"
-                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Logo -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="15,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="▶" FontSize="16" Foreground="#FF1493" FontWeight="Bold" Margin="0,0,8,0"/>
-                        <TextBlock Text="DPlayer" FontWeight="Bold" FontSize="14"
-                                   Foreground="#FFFFFF" VerticalAlignment="Center"/>
-=======
             <!-- Column 0: Left Sidebar -->
-            <Grid Grid.Column="0" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+            <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+                <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="60"/>
                     <RowDefinition Height="*"/>
@@ -87,7 +66,7 @@
                                 <BlurEffect Radius="6"/>
                             </Path.Effect>
                         </Path>
-                        <Path Data="M 0,0 L 20,10 L 0,20 Z" Fill="{StaticResource AccentGradientBrush}" Width="20" Height="20"/>
+                        <Path Data="M 0,0 L 20,10 L 0,20 Z" Fill="{DynamicResource AccentGradientBrush}" Width="20" Height="20"/>
                     </Grid>
                     <TextBlock Text="DPlayer" FontSize="18" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                 </StackPanel>
@@ -105,7 +84,7 @@
                         <RadioButton Style="{StaticResource SidebarRadioButtonStyle}" GroupName="SidebarNav" Checked="WatchLaterNav_Checked" Content="&#xE916;" Tag="Watch Later"/>
 
                         <!-- Section 2: Stream From -->
-                        <TextBlock Text="STREAM FROM" FontSize="9" FontWeight="Bold" Foreground="#4A4A6A" Margin="24,18,0,8" LetterSpacing="1"/>
+                        <TextBlock Text="STREAM FROM" FontSize="9" FontWeight="Bold" Foreground="#4A4A6A" Margin="24,18,0,8"/>
                         <RadioButton Style="{StaticResource SidebarRadioButtonStyle}" GroupName="SidebarNav" Checked="StreamNav_Checked" Content="&#xE714;" Tag="YouTube"/>
                         <RadioButton Style="{StaticResource SidebarRadioButtonStyle}" GroupName="SidebarNav" Checked="StreamNav_Checked" Content="&#xE73E;" Tag="Google Drive"/>
                         <RadioButton Style="{StaticResource SidebarRadioButtonStyle}" GroupName="SidebarNav" Checked="StreamNav_Checked" Content="&#xE716;" Tag="FTP / SFTP"/>
@@ -113,7 +92,7 @@
                         <RadioButton Style="{StaticResource SidebarRadioButtonStyle}" GroupName="SidebarNav" Checked="StreamNav_Checked" Content="&#xE7B4;" Tag="IPTV / Online"/>
 
                         <!-- Section 3: Tools -->
-                        <TextBlock Text="TOOLS" FontSize="9" FontWeight="Bold" Foreground="#4A4A6A" Margin="24,18,0,8" LetterSpacing="1"/>
+                        <TextBlock Text="TOOLS" FontSize="9" FontWeight="Bold" Foreground="#4A4A6A" Margin="24,18,0,8"/>
                         <Grid>
                             <RadioButton Style="{StaticResource SidebarRadioButtonStyle}" GroupName="SidebarNav" Checked="StudyModeNav_Checked" Content="&#xE7BE;" Tag="Study Mode"/>
                             <Border Background="#EC4899" CornerRadius="4" Padding="4,1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,24,0" IsHitTestVisible="False">
@@ -121,14 +100,9 @@
                             </Border>
                         </Grid>
                         <RadioButton Style="{StaticResource SidebarRadioButtonStyle}" GroupName="SidebarNav" Checked="SubtitlesNav_Checked" Content="&#xE7C2;" Tag="AI Subtitles"/>
->>>>>>> Stashed changes
                     </StackPanel>
                 </ScrollViewer>
 
-<<<<<<< Updated upstream
-                    <!-- Search Bar -->
-                    <Grid Grid.Column="1" Margin="30,0" VerticalAlignment="Center">
-=======
                 <!-- Storage Info -->
                 <Border Grid.Row="2" Background="#12122A" CornerRadius="12" Margin="14,10,14,20" Padding="12" BorderBrush="#1D1C3F" BorderThickness="1">
                     <Grid>
@@ -136,421 +110,10 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
->>>>>>> Stashed changes
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-<<<<<<< Updated upstream
-                        <TextBlock Grid.Column="0" Text="🔍" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <TextBox Grid.Column="1" 
-                                 Style="{StaticResource DPlayerTextBoxStyle}"
-                                 Foreground="#FFFFFF"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 Text="Search videos, episodes, subtitles..."
-                                 Padding="0,5"/>
-                    </Grid>
-
-                    <!-- Title Bar Buttons -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,10,0">
-                        <Button Style="{StaticResource TitleBarButtonStyle}" Content="👑" ToolTip="Upgrade" Margin="0,0,10,0"/>
-                        <Button Style="{StaticResource TitleBarButtonStyle}" Content="⚙️" ToolTip="Settings" Margin="0,0,10,0"/>
-                        <Button Style="{StaticResource TitleBarButtonStyle}" Content="📱" ToolTip="Mobile" Margin="0,0,10,0"/>
-                        <Button Style="{StaticResource TitleBarButtonStyle}" Content="📋" ToolTip="Fullscreen" Margin="0,0,10,0"/>
-                        <Button Style="{StaticResource TitleBarButtonStyle}" Content="&#xE921;"
-                                Click="Minimize_Click" ToolTip="Minimize" Margin="0,0,10,0"/>
-                        <Button x:Name="MaximizeButton" Style="{StaticResource TitleBarButtonStyle}" Content="&#xE922;"
-                                Click="Maximize_Click" ToolTip="Maximize" Margin="0,0,10,0"/>
-                        <Button Style="{StaticResource CloseButtonStyle}" Content="&#xE8BB;"
-                                Click="Close_Click" ToolTip="Close"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- Main Content with Sidebar -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="200"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="320"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Left Sidebar Navigation -->
-                <Border Grid.Column="0" Background="#0F1428" BorderBrush="#1A2847" BorderThickness="0,0,1,0">
-                    <StackPanel Margin="0,20,0,0">
-                        <!-- Navigation Items -->
-                        <Button Content="🏠 Home" Style="{StaticResource NavButtonStyle}" 
-                                Command="{Binding OpenFileCommand}" Margin="10,8"/>
-                        <Button Content="📚 Library" Style="{StaticResource NavButtonStyle}" 
-                                Command="{Binding ToggleLibraryPanelCommand}" Margin="10,8"/>
-                        <Button Content="▶️ Playlist" Style="{StaticResource NavButtonStyle}" 
-                                Command="{Binding TogglePlaylistPanelCommand}" Margin="10,8"/>
-                        <Button Content="❤️ Favorites" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
-                        <Button Content="🕐 Recent" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
-                        <Button Content="⬇️ Downloads" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
-                        <Button Content="⏱️ Watch Later" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
-
-                        <Separator Margin="10,15" Background="#1A2847"/>
-
-                        <!-- Tools Section -->
-                        <TextBlock Text="TOOLS" Foreground="#8B949E" FontSize="11" FontWeight="Bold" Margin="15,10,0,5"/>
-                        <Button Content="📖 Study Mode" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
-                        <Button Content="🎯 AI Subtitles" Style="{StaticResource NavButtonStyle}" Margin="10,8"/>
-
-                        <!-- Storage Info -->
-                        <Border Background="#1A2847" Margin="10,20,10,0" Padding="10" CornerRadius="6">
-                            <StackPanel>
-                                <TextBlock Text="Storage" Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" Margin="0,0,0,8"/>
-                                <ProgressBar Height="6" Background="#2A3F5F" Foreground="#00D9FF" Value="50"/>
-                                <TextBlock Text="256 GB / 512 GB" Foreground="#8B949E" FontSize="10" Margin="0,5,0,0"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </Border>
-
-                <!-- Center Main Content Area -->
-                <Grid Grid.Column="1" Background="#0A0E27">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Video Area / Hero Section -->
-                    <Grid Grid.Row="0" Background="#000000"
-                          MouseMove="VideoArea_MouseMove"
-                          MouseLeftButtonDown="VideoArea_MouseLeftButtonDown">
-                        <Grid.ContextMenu>
-                            <ContextMenu Background="{StaticResource SurfaceBrush}"
-                                         DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                                         Foreground="{StaticResource TextPrimaryBrush}"
-                                         BorderBrush="{StaticResource BorderBrush}">
-                                <MenuItem Header="Play / Pause" Command="{Binding TogglePlayPauseCommand}"/>
-                                <MenuItem Header="Open URL..." Command="{Binding OpenUrlCommand}"/>
-                                <Separator/>
-                                <MenuItem Header="Fullscreen" Command="{Binding ToggleFullscreenCommand}"/>
-                            </ContextMenu>
-                        </Grid.ContextMenu>
-
-                        <!-- Video View -->
-                        <vlc:VideoView x:Name="VideoView"
-                                       Background="#000000"
-                                       MouseLeftButtonDown="VideoView_MouseLeftButtonDown"
-                                       Visibility="{Binding CurrentFileName, Converter={StaticResource BoolToVis}}"/>
-
-                        <!-- Hero Section (when idle) -->
-                        <ScrollViewer Visibility="{Binding CurrentFileName, Converter={StaticResource BoolToVis}, ConverterParameter=inverse}"
-                                      VerticalScrollBarVisibility="Auto">
-                            <StackPanel Margin="40,30">
-                                <!-- Hero Title -->
-                                <StackPanel HorizontalAlignment="Center" Margin="0,40,0,60">
-                                    <TextBlock Text="DPlayer" FontSize="72" FontWeight="Bold"
-                                               Foreground="#FFFFFF" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="A Smart Player for Your Videos" FontSize="24"
-                                               Foreground="#00D9FF" HorizontalAlignment="Center" Margin="0,10,0,0"/>
-                                    <TextBlock Text="Play. Understand. Learn." FontSize="18"
-                                               Foreground="#8B949E" HorizontalAlignment="Center" Margin="0,15,0,0"/>
-                                </StackPanel>
-
-                                <!-- Action Cards -->
-                                <Grid Margin="0,0,0,40">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <!-- Open File Card -->
-                                    <Border Grid.Column="0" Background="#1A2847" CornerRadius="12" Margin="10"
-                                            Padding="20" Cursor="Hand">
-                                        <Border.InputBindings>
-                                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenFileCommand}"/>
-                                        </Border.InputBindings>
-                                        <StackPanel>
-                                            <TextBlock Text="📁" FontSize="32" Margin="0,0,0,10"/>
-                                            <TextBlock Text="Open File" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,5"/>
-                                            <TextBlock Text="Play local videos" FontSize="12" Foreground="#8B949E"/>
-                                        </StackPanel>
-                                    </Border>
-
-                                    <!-- Open URL Card -->
-                                    <Border Grid.Column="1" Background="#1A2847" CornerRadius="12" Margin="10"
-                                            Padding="20" Cursor="Hand">
-                                        <Border.InputBindings>
-                                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenUrlCommand}"/>
-                                        </Border.InputBindings>
-                                        <StackPanel>
-                                            <TextBlock Text="🌐" FontSize="32" Margin="0,0,0,10"/>
-                                            <TextBlock Text="Open URL" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,5"/>
-                                            <TextBlock Text="Stream from the web" FontSize="12" Foreground="#8B949E"/>
-                                        </StackPanel>
-                                    </Border>
-
-                                    <!-- Library Card -->
-                                    <Border Grid.Column="2" Background="#FF6B35" CornerRadius="12" Margin="10"
-                                            Padding="20" Cursor="Hand">
-                                        <Border.InputBindings>
-                                            <MouseBinding MouseAction="LeftClick" Command="{Binding ToggleLibraryPanelCommand}"/>
-                                        </Border.InputBindings>
-                                        <StackPanel>
-                                            <TextBlock Text="🎬" FontSize="32" Margin="0,0,0,10"/>
-                                            <TextBlock Text="Library" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,5"/>
-                                            <TextBlock Text="Your media collection" FontSize="12" Foreground="#FFFFFF" Opacity="0.8"/>
-                                        </StackPanel>
-                                    </Border>
-                                </Grid>
-
-                                <!-- Continue Watching Section -->
-                                <TextBlock Text="Continue Watching" FontSize="18" FontWeight="Bold" 
-                                           Foreground="#FFFFFF" Margin="0,0,0,20"/>
-
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <!-- Video Thumbnail 1 -->
-                                    <Border Grid.Column="0" Background="#1A2847" CornerRadius="8" Margin="10"
-                                            Height="180">
-                                        <Grid>
-                                            <Image Source="pack://application:,,,/DPlayer;component/Assets/Dplayer.ico" 
-                                                   Stretch="UniformToFill"/>
-                                            <StackPanel VerticalAlignment="Bottom" Background="#00000080" Padding="10">
-                                                <TextBlock Text="Nature Documentary.mp4" FontSize="12" 
-                                                           Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                                <ProgressBar Height="4" Background="#333333" Foreground="#00D9FF" 
-                                                             Value="43" Margin="0,5,0,0"/>
-                                                <TextBlock Text="43% watched" FontSize="10" Foreground="#8B949E" Margin="0,3,0,0"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-
-                                    <!-- Video Thumbnail 2 -->
-                                    <Border Grid.Column="1" Background="#1A2847" CornerRadius="8" Margin="10"
-                                            Height="180">
-                                        <Grid>
-                                            <Image Source="pack://application:,,,/DPlayer;component/Assets/Dplayer.ico" 
-                                                   Stretch="UniformToFill"/>
-                                            <StackPanel VerticalAlignment="Bottom" Background="#00000080" Padding="10">
-                                                <TextBlock Text="City Lights.mp4" FontSize="12" 
-                                                           Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                                <ProgressBar Height="4" Background="#333333" Foreground="#00D9FF" 
-                                                             Value="67" Margin="0,5,0,0"/>
-                                                <TextBlock Text="67% watched" FontSize="10" Foreground="#8B949E" Margin="0,3,0,0"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-
-                                    <!-- Video Thumbnail 3 -->
-                                    <Border Grid.Column="2" Background="#1A2847" CornerRadius="8" Margin="10"
-                                            Height="180">
-                                        <Grid>
-                                            <Image Source="pack://application:,,,/DPlayer;component/Assets/Dplayer.ico" 
-                                                   Stretch="UniformToFill"/>
-                                            <StackPanel VerticalAlignment="Bottom" Background="#00000080" Padding="10">
-                                                <TextBlock Text="Anime Movie.mp4" FontSize="12" 
-                                                           Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                                <ProgressBar Height="4" Background="#333333" Foreground="#00D9FF" 
-                                                             Value="51" Margin="0,5,0,0"/>
-                                                <TextBlock Text="51% watched" FontSize="10" Foreground="#8B949E" Margin="0,3,0,0"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-
-                                    <!-- Video Thumbnail 4 -->
-                                    <Border Grid.Column="3" Background="#1A2847" CornerRadius="8" Margin="10"
-                                            Height="180">
-                                        <Grid>
-                                            <Image Source="pack://application:,,,/DPlayer;component/Assets/Dplayer.ico" 
-                                                   Stretch="UniformToFill"/>
-                                            <StackPanel VerticalAlignment="Bottom" Background="#00000080" Padding="10">
-                                                <TextBlock Text="Ocean Life.mp4" FontSize="12" 
-                                                           Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                                                <ProgressBar Height="4" Background="#333333" Foreground="#00D9FF" 
-                                                             Value="28" Margin="0,5,0,0"/>
-                                                <TextBlock Text="28% watched" FontSize="10" Foreground="#8B949E" Margin="0,3,0,0"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </Grid>
-                            </StackPanel>
-                        </ScrollViewer>
-
-                        <!-- OSD Display -->
-                        <Border Background="#000000CC" CornerRadius="6" Padding="18,10"
-                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Visibility="{Binding IsOsdVisible, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="{Binding OsdText}" Foreground="White" FontSize="18" FontWeight="SemiBold"/>
-                        </Border>
-                    </Grid>
-
-                    <!-- Control Bar -->
-                    <Border Grid.Row="1" Background="#1A1F3A" BorderBrush="#2A3F5F" BorderThickness="0,1,0,0"
-                            Padding="8,5" Visibility="{Binding IsControlsVisible, Converter={StaticResource BoolToVis}}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Seek Bar -->
-                            <Grid Grid.Row="0" Margin="0,0,0,3">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding Position, Converter={StaticResource TimeFormat}}"
-                                           Foreground="#8B949E" FontSize="12" VerticalAlignment="Center" 
-                                           Margin="0,0,8,0" FontFamily="{StaticResource MonoFont}"/>
-                                <Slider Grid.Column="1" Style="{StaticResource SeekSliderStyle}"
-                                        Minimum="0" Maximum="{Binding Duration.TotalSeconds}"
-                                        Value="{Binding Position.TotalSeconds, Mode=OneWay}"/>
-                                <TextBlock Grid.Column="2" Text="{Binding Duration, Converter={StaticResource TimeFormat}}"
-                                           Foreground="#8B949E" FontSize="12" VerticalAlignment="Center" 
-                                           Margin="8,0,0,0" FontFamily="{StaticResource MonoFont}"/>
-                            </Grid>
-
-                            <!-- Control Buttons -->
-                            <Grid Grid.Row="1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Button Grid.Column="0" Content="{Binding IsPlaying, Converter={StaticResource PlayIcon}}"
-                                        Style="{StaticResource IconButtonStyle}" Command="{Binding TogglePlayPauseCommand}"
-                                        Margin="0,0,8,0" Width="32" Height="32"/>
-                                <Button Grid.Column="1" Content="⏭️" Style="{StaticResource IconButtonStyle}"
-                                        Command="{Binding NextCommand}" Margin="0,0,8,0" Width="32" Height="32"/>
-                                <Button Grid.Column="2" Content="🔊" Style="{StaticResource IconButtonStyle}"
-                                        Margin="0,0,8,0" Width="32" Height="32"/>
-
-                                <Slider Grid.Column="3" Margin="8,0" VerticalAlignment="Center"
-                                        Minimum="0" Maximum="100" Value="70" Height="4"/>
-
-                                <TextBlock Grid.Column="4" Text="1.0x" Foreground="#8B949E" FontSize="12"
-                                           VerticalAlignment="Center" Margin="0,0,15,0"/>
-                                <Button Grid.Column="5" Content="CC" Style="{StaticResource IconButtonStyle}"
-                                        Margin="0,0,8,0" Width="32" Height="32"/>
-                                <Button Grid.Column="6" Content="⛶" Style="{StaticResource IconButtonStyle}"
-                                        Command="{Binding ToggleFullscreenCommand}" Width="32" Height="32"/>
-                            </Grid>
-                        </Grid>
-                    </Border>
-                </Grid>
-
-                <!-- Right Panel - Smart Features -->
-                <Border Grid.Column="2" Background="#0F1428" BorderBrush="#1A2847" BorderThickness="1,0,0,0">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Margin="15,20">
-                            <!-- AI Subtitles Card -->
-                            <Border Background="#1A2847" CornerRadius="10" Padding="15" Margin="0,0,0,15">
-                                <StackPanel>
-                                    <TextBlock Text="🎯 AI Subtitles" FontSize="14" FontWeight="Bold" 
-                                               Foreground="#FFFFFF" Margin="0,0,0,10"/>
-                                    <TextBlock Text="Find, generate or create live subtitles" FontSize="11" 
-                                               Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                                    <Button Content="Get Subtitles" Background="#00D9FF" Foreground="#000000" 
-                                            FontWeight="Bold" Padding="10,8" CornerRadius="6"
-                                            Command="{Binding OpenSubtitleSearchCommand}"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Study Mode Card -->
-                            <Border Background="#1A2847" CornerRadius="10" Padding="15" Margin="0,0,0,15">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                        <TextBlock Text="📖 Study Mode" FontSize="14" FontWeight="Bold" 
-                                                   Foreground="#FFFFFF"/>
-                                        <TextBlock Text="NEW" FontSize="10" FontWeight="Bold" 
-                                                   Foreground="#FF6B35" Margin="8,0,0,0" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Text="Ask the video. Find answers. Save time." FontSize="11" 
-                                               Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                                    <Button Content="Start Study Mode" Background="#FF6B35" Foreground="#FFFFFF" 
-                                            FontWeight="Bold" Padding="10,8" CornerRadius="6"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Smart Features Section -->
-                            <TextBlock Text="Smart Features" FontSize="13" FontWeight="Bold" 
-                                       Foreground="#FFFFFF" Margin="0,0,0,12"/>
-
-                            <!-- Feature Items -->
-                            <StackPanel Margin="0,0,0,10">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                    <TextBlock Text="🎤" FontSize="16" Margin="0,0,10,0"/>
-                                    <StackPanel>
-                                        <TextBlock Text="AI Translations &amp; Dubbing" FontSize="12" 
-                                                   Foreground="#FFFFFF" FontWeight="SemiBold"/>
-                                        <TextBlock Text="Watch in any language" FontSize="10" 
-                                                   Foreground="#8B949E"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,10">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                    <TextBlock Text="📺" FontSize="16" Margin="0,0,10,0"/>
-                                    <StackPanel>
-                                        <TextBlock Text="Smart Episode Detection" FontSize="12" 
-                                                   Foreground="#FFFFFF" FontWeight="SemiBold"/>
-                                        <TextBlock Text="Always in the right order" FontSize="10" 
-                                                   Foreground="#8B949E"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,10">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                    <TextBlock Text="📝" FontSize="16" Margin="0,0,10,0"/>
-                                    <StackPanel>
-                                        <TextBlock Text="AI Summaries" FontSize="12" 
-                                                   Foreground="#FFFFFF" FontWeight="SemiBold"/>
-                                        <TextBlock Text="Summarize any video" FontSize="10" 
-                                                   Foreground="#8B949E"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,10">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                    <TextBlock Text="⏱️" FontSize="16" Margin="0,0,10,0"/>
-                                    <StackPanel>
-                                        <TextBlock Text="Timestamp Search" FontSize="12" 
-                                                   Foreground="#FFFFFF" FontWeight="SemiBold"/>
-                                        <TextBlock Text="Jump to what matters" FontSize="10" 
-                                                   Foreground="#8B949E"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,10">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                    <TextBlock Text="❓" FontSize="16" Margin="0,0,10,0"/>
-                                    <StackPanel>
-                                        <TextBlock Text="Ask the Video" FontSize="12" 
-                                                   Foreground="#FFFFFF" FontWeight="SemiBold"/>
-                                        <TextBlock Text="Chat with your content" FontSize="10" 
-                                                   Foreground="#8B949E"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <TextBlock Text="See all features" FontSize="11" Foreground="#00D9FF" 
-                                       Margin="0,10,0,0" Cursor="Hand" TextDecoration="Underline"/>
-                        </StackPanel>
-                    </ScrollViewer>
-=======
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="&#xE753;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#EC4899" Margin="0,0,8,4"/>
                         <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,6">
@@ -559,7 +122,7 @@
                         </StackPanel>
 
                         <ProgressBar Grid.Row="1" Grid.ColumnSpan="2" Height="4" Value="50" Minimum="0" Maximum="100"
-                                     Background="#1D1C3F" Foreground="{StaticResource AccentGradientBrush}">
+                                     Background="#1D1C3F" Foreground="{DynamicResource AccentGradientBrush}">
                             <ProgressBar.Template>
                                 <ControlTemplate TargetType="ProgressBar">
                                     <Grid>
@@ -571,7 +134,8 @@
                         </ProgressBar>
                     </Grid>
                 </Border>
-            </Grid>
+                </Grid>
+            </Border>
 
             <!-- Column 1: Main Content Column -->
             <Grid Grid.Column="1">
@@ -695,8 +259,8 @@
                                             </StackPanel>
 
                                             <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,0,24,0">
-                                                <Ellipse Width="110" Height="110" Stroke="{StaticResource AccentGradientBrush}" StrokeThickness="2" Opacity="0.6"/>
-                                                <Border Width="80" Height="80" CornerRadius="40" Background="{StaticResource AccentGradientBrush}">
+                                                <Ellipse Width="110" Height="110" Stroke="{DynamicResource AccentGradientBrush}" StrokeThickness="2" Opacity="0.6"/>
+                                                <Border Width="80" Height="80" CornerRadius="40" Background="{DynamicResource AccentGradientBrush}">
                                                     <Border.Effect>
                                                         <DropShadowEffect Color="#A855F7" BlurRadius="20" ShadowDepth="0" Opacity="0.8"/>
                                                     </Border.Effect>
@@ -719,7 +283,7 @@
 
                                     <!-- Open File -->
                                     <Button Grid.Column="0" Command="{Binding OpenFileCommand}" Style="{StaticResource CleanButtonStyle}">
-                                        <Border Background="{StaticResource OpenFileGradientBrush}" CornerRadius="16" Padding="18,20" Height="90">
+                                        <Border Background="{DynamicResource OpenFileGradientBrush}" CornerRadius="16" Padding="18,20" Height="90">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
@@ -740,7 +304,7 @@
 
                                     <!-- Open URL -->
                                     <Button Grid.Column="2" Command="{Binding OpenUrlCommand}" Style="{StaticResource CleanButtonStyle}">
-                                        <Border Background="{StaticResource OpenUrlGradientBrush}" CornerRadius="16" Padding="18,20" Height="90">
+                                        <Border Background="{DynamicResource OpenUrlGradientBrush}" CornerRadius="16" Padding="18,20" Height="90">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
@@ -761,7 +325,7 @@
 
                                     <!-- Library -->
                                     <Button Grid.Column="4" Command="{Binding ToggleLibraryPanelCommand}" Style="{StaticResource CleanButtonStyle}">
-                                        <Border Background="{StaticResource LibraryGradientBrush}" CornerRadius="16" Padding="18,20" Height="90">
+                                        <Border Background="{DynamicResource LibraryGradientBrush}" CornerRadius="16" Padding="18,20" Height="90">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
@@ -858,7 +422,7 @@
                                             <TextBlock Grid.Row="1" Grid.Column="0" Text="Find, generate or create live subtitles" FontSize="10" Foreground="#9393C5" TextWrapping="Wrap" Margin="0,0,0,12"/>
 
                                             <Button Grid.Row="2" Grid.Column="0" Style="{StaticResource CleanButtonStyle}" Command="{Binding OpenSubtitleSearchCommand}">
-                                                <Border CornerRadius="12" Background="{StaticResource AccentGradientBrush}" Padding="12,5" HorizontalAlignment="Left">
+                                                <Border CornerRadius="12" Background="{DynamicResource AccentGradientBrush}" Padding="12,5" HorizontalAlignment="Left">
                                                     <TextBlock Text="Get Subtitles" FontSize="10" FontWeight="Bold" Foreground="White"/>
                                                 </Border>
                                             </Button>
@@ -1097,8 +661,8 @@
 
                             <!-- Side Panel (Playlist / Subtitles) -->
                             <Border Grid.Column="1" Width="{StaticResource SidePanelWidth}"
-                                    Background="{StaticResource SurfaceBrush}"
-                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0"
+                                    Background="{DynamicResource SurfaceBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0"
                                     Visibility="{Binding IsPlaylistPanelOpen, Converter={StaticResource BoolToVis}}">
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -1106,7 +670,7 @@
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
 
-                                    <Border Grid.Row="0" Padding="12,8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                                    <Border Grid.Row="0" Padding="12,8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
                                         <Grid>
                                             <TextBlock Text="Playlist" FontWeight="SemiBold" FontSize="14"/>
                                             <Button Content="&#xE711;" Style="{StaticResource IconButtonStyle}"
@@ -1172,8 +736,8 @@
 
                             <!-- Side Panel (Library) -->
                             <Border Grid.Column="1" Width="{StaticResource SidePanelWidth}"
-                                    Background="{StaticResource SurfaceBrush}"
-                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0"
+                                    Background="{DynamicResource SurfaceBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0"
                                     Visibility="{Binding IsLibraryPanelOpen, Converter={StaticResource BoolToVis}}">
                                 <Grid DataContext="{Binding LibraryVm}">
                                     <Grid.RowDefinitions>
@@ -1182,7 +746,7 @@
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
 
-                                    <Border Grid.Row="0" Padding="12,8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                                    <Border Grid.Row="0" Padding="12,8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
                                         <Grid>
                                             <TextBlock Text="Library" FontWeight="SemiBold" FontSize="14"/>
                                             <Button Content="&#xE711;" Style="{StaticResource IconButtonStyle}"
@@ -1415,7 +979,6 @@
                             </StackPanel>
                         </Grid>
                     </Grid>
->>>>>>> Stashed changes
                 </Border>
             </Grid>
         </Grid>

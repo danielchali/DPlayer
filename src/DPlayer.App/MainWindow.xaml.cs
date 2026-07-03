@@ -346,6 +346,66 @@ public partial class MainWindow : Window
         NativeMethods.InvalidateRect(hwnd, IntPtr.Zero, true);
     }
 
+    private void HomeNav_Checked(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel == null) return;
+        _viewModel.CurrentView = "Home";
+        _viewModel.IsLibraryPanelOpen = false;
+        _viewModel.IsPlaylistPanelOpen = false;
+    }
+
+    private void LibraryNav_Checked(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel == null) return;
+        _viewModel.CurrentView = "Player";
+        _viewModel.IsLibraryPanelOpen = true;
+        _viewModel.IsPlaylistPanelOpen = false;
+    }
+
+    private void PlaylistNav_Checked(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel == null) return;
+        _viewModel.CurrentView = "Player";
+        _viewModel.IsLibraryPanelOpen = false;
+        _viewModel.IsPlaylistPanelOpen = true;
+    }
+
+    private void FavoritesNav_Checked(object sender, RoutedEventArgs e)
+    {
+    }
+
+    private void RecentNav_Checked(object sender, RoutedEventArgs e)
+    {
+    }
+
+    private void DownloadsNav_Checked(object sender, RoutedEventArgs e)
+    {
+    }
+
+    private void WatchLaterNav_Checked(object sender, RoutedEventArgs e)
+    {
+    }
+
+    private void StreamNav_Checked(object sender, RoutedEventArgs e)
+    {
+    }
+
+    private void StudyModeNav_Checked(object sender, RoutedEventArgs e)
+    {
+    }
+
+    private void SubtitlesNav_Checked(object sender, RoutedEventArgs e)
+    {
+    }
+
+    private void HeaderSearchBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            Keyboard.ClearFocus();
+        }
+    }
+
     private static class NativeMethods
     {
         public const int GclpHbrBackground = -10;

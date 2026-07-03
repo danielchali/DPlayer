@@ -41,15 +41,6 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private double _brightness = 1.0;
     [ObservableProperty] private double _contrast = 1.0;
     [ObservableProperty] private double _saturation = 1.0;
-    [ObservableProperty] private bool _isControlsVisible = true;
-    [ObservableProperty] private bool _isShuffle;
-    [ObservableProperty] private bool _isLooping;
-    [ObservableProperty] private bool _isMuted;
-    [ObservableProperty] private PlaybackState _playbackState;
-    [ObservableProperty] private string _playbackSpeedText = "1.0x";
-    [ObservableProperty] private double _brightness = 1.0;
-    [ObservableProperty] private double _contrast = 1.0;
-    [ObservableProperty] private double _saturation = 1.0;
     [ObservableProperty] private AspectRatioMode _aspectRatio = AspectRatioMode.Auto;
     [ObservableProperty] private VideoRotation _rotation = VideoRotation.None;
     [ObservableProperty] private ObservableCollection<AudioTrack> _audioTracks = [];

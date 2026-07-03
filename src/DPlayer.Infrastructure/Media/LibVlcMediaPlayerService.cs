@@ -322,14 +322,14 @@ public sealed class LibVlcMediaPlayerService : IMediaPlayerService, IDisposable
         }
     }
 
-    private void SetPlayerProperty(string propertyName, object value)
+    private void SetPlayerProperty(string propertyName, object? value)
     {
         try
         {
             var property = _player?.GetType().GetProperty(propertyName);
             if (property is not { CanWrite: true }) return;
 
-            var converted = Convert.ChangeType(value, property.PropertyType);
+            var converted = value is not null ? Convert.ChangeType(value, property.PropertyType) : null;
             property.SetValue(_player, converted);
         }
         catch (Exception ex)

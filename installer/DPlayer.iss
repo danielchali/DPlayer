@@ -1,10 +1,16 @@
 ; DPlayer Inno Setup Installer Script
 ; Requires Inno Setup 6: https://jrsoftware.org/isinfo.php
+; 
+; IMPORTANT: Compiling this script directly in the Inno Setup GUI will package whatever is currently in the "publish" folder.
+; If you have made code changes, they will not be included unless you publish first.
+; To compile the fresh version:
+;   Run ".\build-installer.ps1" in PowerShell to automatically republish the app and compile the installer.
+;   Or run "dotnet publish -c Release -r win-x64 -o .\publish" before compiling in the Inno Setup GUI.
 
 #define MyAppName "DPlayer"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "DPlayer"
-#define MyAppURL "https://github.com/DPlayer/DPlayer"
+#define MyAppURL "https://github.com/danielchali/DPlayer"
 #define MyAppExeName "DPlayer.exe"
 
 [Setup]

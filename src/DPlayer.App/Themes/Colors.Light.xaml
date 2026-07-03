@@ -34,4 +34,25 @@
         <GradientStop Color="#F6F8FA" Offset="1"/>
     </LinearGradientBrush>
 
+    <!-- Dashboard card gradient brushes -->
+    <LinearGradientBrush x:Key="OpenFileGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#007A30" Offset="0"/>
+        <GradientStop Color="#00A040" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="OpenUrlGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#0284C7" Offset="0"/>
+        <GradientStop Color="#00C853" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="LibraryGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#EA580C" Offset="0"/>
+        <GradientStop Color="#EAB308" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="SidebarSelectionGradientBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#007A30" Offset="0"/>
+        <GradientStop Color="#00C853" Offset="1"/>
+    </LinearGradientBrush>
+
 </ResourceDictionary>
