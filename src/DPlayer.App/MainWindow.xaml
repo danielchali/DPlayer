@@ -1,0 +1,208 @@
+﻿<Window x:Class="DPlayer.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DPlayer.App"
+        xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
+        mc:Ignorable="d"
+        Title="DPlayer" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen"
+        Background="#1e1e1e">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Video Player Area -->
+        <Grid Grid.Row="0" Background="#000000">
+            <vlc:VideoView x:Name="VideoView" />
+            <StackPanel x:Name="NoMediaPanel" 
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Center"
+                        Visibility="Visible">
+                <TextBlock Text="No media loaded" 
+                           FontSize="24" 
+                           Foreground="#888888" 
+                           HorizontalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" 
+                            HorizontalAlignment="Center" 
+                            Margin="0,20,0,0">
+                    <Button x:Name="OpenFileButton" 
+                            Content="Open File" 
+                            Width="120" 
+                            Height="35" 
+                            Margin="5"
+                            Click="OpenFileButton_Click"
+                            Background="#3a3a3a" 
+                            Foreground="White"
+                            BorderBrush="#555555"
+                            Cursor="Hand"/>
+                    <Button x:Name="OpenUrlButton" 
+                            Content="Open URL" 
+                            Width="120" 
+                            Height="35" 
+                            Margin="5"
+                            Click="OpenUrlButton_Click"
+                            Background="#3a3a3a" 
+                            Foreground="White"
+                            BorderBrush="#555555"
+                            Cursor="Hand"/>
+                    <Button x:Name="LibraryButton" 
+                            Content="Library" 
+                            Width="120" 
+                            Height="35" 
+                            Margin="5"
+                            Click="LibraryButton_Click"
+                            Background="#3a3a3a" 
+                            Foreground="White"
+                            BorderBrush="#555555"
+                            Cursor="Hand"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <!-- Playback Controls -->
+        <Grid Grid.Row="1" Background="#2d2d2d">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Playback Buttons -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="StopButton" 
+                        Content="⏹" 
+                        Width="40" 
+                        Height="30" 
+                        Margin="0,0,5,0"
+                        Click="StopButton_Click"
+                        Background="Transparent" 
+                        Foreground="White"
+                        BorderBrush="Transparent"
+                        FontSize="16"
+                        Cursor="Hand"/>
+                <Button x:Name="PreviousButton" 
+                        Content="⏮" 
+                        Width="40" 
+                        Height="30" 
+                        Margin="0,0,5,0"
+                        Click="PreviousButton_Click"
+                        Background="Transparent" 
+                        Foreground="White"
+                        BorderBrush="Transparent"
+                        FontSize="16"
+                        Cursor="Hand"/>
+                <Button x:Name="PlayPauseButton" 
+                        Content="▶" 
+                        Width="45" 
+                        Height="35" 
+                        Margin="0,0,5,0"
+                        Click="PlayPauseButton_Click"
+                        Background="#0078d4" 
+                        Foreground="White"
+                        BorderBrush="Transparent"
+                        FontSize="18"
+                        Cursor="Hand"/>
+                <Button x:Name="NextButton" 
+                        Content="⏭" 
+                        Width="40" 
+                        Height="30" 
+                        Margin="0,0,5,0"
+                        Click="NextButton_Click"
+                        Background="Transparent" 
+                        Foreground="White"
+                        BorderBrush="Transparent"
+                        FontSize="16"
+                        Cursor="Hand"/>
+            </StackPanel>
+
+            <!-- Progress Bar and Time -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" 
+                               x:Name="CurrentTimeText" 
+                               Text="00:00" 
+                               Foreground="White" 
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    <Slider Grid.Column="1" 
+                            x:Name="ProgressSlider" 
+                            Minimum="0" 
+                            Maximum="100" 
+                            Value="0"
+                            VerticalAlignment="Center"
+                            PreviewMouseLeftButtonUp="ProgressSlider_PreviewMouseLeftButtonUp"/>
+                    <TextBlock Grid.Column="2" 
+                               x:Name="TotalTimeText" 
+                               Text="00:00" 
+                               Foreground="White" 
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0"/>
+                </Grid>
+            </StackPanel>
+
+            <!-- Volume and Speed Controls -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock x:Name="SpeedText" 
+                           Text="1.0x" 
+                           Foreground="White" 
+                           FontSize="12"
+                           VerticalAlignment="Center"
+                           Margin="0,0,5,0"/>
+                <ComboBox x:Name="SpeedComboBox" 
+                          Width="60" 
+                          Height="25" 
+                          SelectionChanged="SpeedComboBox_SelectionChanged"
+                          Background="#3a3a3a" 
+                          Foreground="White"
+                          BorderBrush="#555555">
+                    <ComboBoxItem Content="0.5x" Tag="0.5"/>
+                    <ComboBoxItem Content="0.75x" Tag="0.75"/>
+                    <ComboBoxItem Content="1.0x" Tag="1.0" IsSelected="True"/>
+                    <ComboBoxItem Content="1.25x" Tag="1.25"/>
+                    <ComboBoxItem Content="1.5x" Tag="1.5"/>
+                    <ComboBoxItem Content="2.0x" Tag="2.0"/>
+                </ComboBox>
+                <Button x:Name="MuteButton" 
+                        Content="🔊" 
+                        Width="35" 
+                        Height="30" 
+                        Margin="10,0,5,0"
+                        Click="MuteButton_Click"
+                        Background="Transparent" 
+                        Foreground="White"
+                        BorderBrush="Transparent"
+                        FontSize="14"
+                        Cursor="Hand"/>
+                <Slider x:Name="VolumeSlider" 
+                        Width="80" 
+                        Minimum="0" 
+                        Maximum="100" 
+                        Value="100"
+                        VerticalAlignment="Center"
+                        ValueChanged="VolumeSlider_ValueChanged"/>
+                <Button x:Name="FullScreenButton" 
+                        Content="⛶" 
+                        Width="35" 
+                        Height="30" 
+                        Margin="10,0,0,0"
+                        Click="FullScreenButton_Click"
+                        Background="Transparent" 
+                        Foreground="White"
+                        BorderBrush="Transparent"
+                        FontSize="14"
+                        Cursor="Hand"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

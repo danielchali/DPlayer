@@ -1,0 +1,186 @@
+{
+  "version": 3,
+  "targets": {
+    "net9.0-windows7.0": {
+      "LibVLCSharp/3.10.0": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/LibVLCSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/LibVLCSharp.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "LibVLCSharp.WPF/3.10.0": {
+        "type": "package",
+        "dependencies": {
+          "LibVLCSharp": "3.10.0"
+        },
+        "compile": {
+          "lib/net6.0-windows7.0/LibVLCSharp.WPF.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0-windows7.0/LibVLCSharp.WPF.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WPF"
+        ]
+      }
+    }
+  },
+  "libraries": {
+    "LibVLCSharp/3.10.0": {
+      "sha512": "VHuOfq8Xtb/lNz0asvCm5qDjgTmfB3m3lC40Dz9iH9oL3DM0fSXHjZaLxdtYVr5nsldJoh5BTeG8MtODprhC9Q==",
+      "type": "package",
+      "path": "libvlcsharp/3.10.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/monoandroid81/LibVLCSharp.Android.AWindow.dll",
+        "lib/monoandroid81/LibVLCSharp.dll",
+        "lib/monoandroid81/LibVLCSharp.xml",
+        "lib/net10.0-android36.0/LibVLCSharp.dll",
+        "lib/net10.0-android36.0/LibVLCSharp.xml",
+        "lib/net10.0-ios26.0/LibVLCSharp.dll",
+        "lib/net10.0-ios26.0/LibVLCSharp.xml",
+        "lib/net10.0/LibVLCSharp.dll",
+        "lib/net10.0/LibVLCSharp.xml",
+        "lib/net40/LibVLCSharp.dll",
+        "lib/net40/LibVLCSharp.xml",
+        "lib/net471/LibVLCSharp.dll",
+        "lib/net471/LibVLCSharp.xml",
+        "lib/net6.0/LibVLCSharp.dll",
+        "lib/net6.0/LibVLCSharp.xml",
+        "lib/net8.0/LibVLCSharp.dll",
+        "lib/net8.0/LibVLCSharp.xml",
+        "lib/net9.0-android35.0/LibVLCSharp.dll",
+        "lib/net9.0-android35.0/LibVLCSharp.xml",
+        "lib/net9.0-ios18.0/LibVLCSharp.dll",
+        "lib/net9.0-ios18.0/LibVLCSharp.xml",
+        "lib/net9.0-macos15.0/LibVLCSharp.dll",
+        "lib/net9.0-macos15.0/LibVLCSharp.xml",
+        "lib/net9.0-tvos18.0/LibVLCSharp.dll",
+        "lib/net9.0-tvos18.0/LibVLCSharp.xml",
+        "lib/net9.0/LibVLCSharp.dll",
+        "lib/net9.0/LibVLCSharp.xml",
+        "lib/netstandard1.1/LibVLCSharp.dll",
+        "lib/netstandard1.1/LibVLCSharp.xml",
+        "lib/netstandard2.0/LibVLCSharp.dll",
+        "lib/netstandard2.0/LibVLCSharp.xml",
+        "lib/netstandard2.1/LibVLCSharp.dll",
+        "lib/netstandard2.1/LibVLCSharp.xml",
+        "lib/xamarinios10/LibVLCSharp.dll",
+        "lib/xamarinios10/LibVLCSharp.xml",
+        "lib/xamarinmac20/LibVLCSharp.dll",
+        "lib/xamarinmac20/LibVLCSharp.xml",
+        "libvlcsharp.3.10.0.nupkg.sha512",
+        "libvlcsharp.nuspec"
+      ]
+    },
+    "LibVLCSharp.WPF/3.10.0": {
+      "sha512": "W7MFdY0QZBhATS3ZIMZSY1UYV6MqDxb+GibNzT3AzKNzDQX2Kzf27OZA5B0gA7fa2FYq79P7Jvlvdbbygis63g==",
+      "type": "package",
+      "path": "libvlcsharp.wpf/3.10.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net461/LibVLCSharp.WPF.dll",
+        "lib/net461/LibVLCSharp.WPF.xml",
+        "lib/net6.0-windows7.0/LibVLCSharp.WPF.dll",
+        "lib/net6.0-windows7.0/LibVLCSharp.WPF.xml",
+        "lib/netcoreapp3.1/LibVLCSharp.WPF.dll",
+        "lib/netcoreapp3.1/LibVLCSharp.WPF.xml",
+        "libvlcsharp.wpf.3.10.0.nupkg.sha512",
+        "libvlcsharp.wpf.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net9.0-windows7.0": [
+      "LibVLCSharp.WPF >= 3.10.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Daniel\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\Daniel\\Documents\\GitHub\\DPlayer\\src\\DPlayer.App\\DPlayer.App.csproj",
+      "projectName": "DPlayer.App",
+      "projectPath": "C:\\Users\\Daniel\\Documents\\GitHub\\DPlayer\\src\\DPlayer.App\\DPlayer.App.csproj",
+      "packagesPath": "C:\\Users\\Daniel\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Daniel\\Documents\\GitHub\\DPlayer\\src\\DPlayer.App\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\Daniel\\AppData\\Roaming\\NuGet\\NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net9.0-windows"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net9.0-windows7.0": {
+        "targetAlias": "net9.0-windows",
+        "dependencies": {
+          "LibVLCSharp.WPF": {
+            "target": "Package",
+            "version": "[3.10.0, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          },
+          "Microsoft.WindowsDesktop.App.WPF": {
+            "privateAssets": "none"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.315/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
