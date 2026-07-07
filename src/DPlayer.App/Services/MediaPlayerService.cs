@@ -20,6 +20,7 @@ public class MediaPlayerService : IDisposable
     {
         if (_libVLC == null)
         {
+            Core.Initialize();
             _libVLC = new LibVLC(enableDebugLogs: false);
             _mediaPlayer = new MediaPlayer(_libVLC);
             
@@ -33,7 +34,19 @@ public class MediaPlayerService : IDisposable
     public void LoadMedia(string path)
     {
         Initialize();
-        _media = new Media(_libVLC!, new Uri(path));
+        _media?.Dispose();
+
+        if (Uri.TryCreate(path, UriKind.Absolute, out var uri) && 
+            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps || 
+             uri.Scheme == "rtsp" || uri.Scheme == "rtmp" || uri.Scheme == "ftp"))
+        {
+            _media = new Media(_libVLC!, uri);
+        }
+        else
+        {
+            _media = new Media(_libVLC!, path, FromType.FromPath);
+        }
+
         _mediaPlayer!.Media = _media;
     }
 

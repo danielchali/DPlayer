@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,8 +19,9 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        InitializeComponent();
+        Core.Initialize();
         _mediaPlayerService = new MediaPlayerService();
+        InitializeComponent();
         
         Loaded += MainWindow_Loaded;
         Closed += MainWindow_Closed;
@@ -93,7 +94,7 @@ public partial class MainWindow : Window
     {
         var openFileDialog = new OpenFileDialog
         {
-            Filter = "All Media Files|*.mp4;*.avi;*.mkv;*.mov;*.wmv;*.flv;*.webm;*.mp3;*.wav;*.ogg;*.flac;*.aac;*.m4a;*.wma|Video Files|*.mp4;*.avi;*.mkv;*.mov;*.wmv;*.flv;*.webm|Audio Files|*.mp3;*.wav;*.ogg;*.flac;*.aac;*.m4a;*.wma|All Files|*.*",
+            Filter = "All Media Files|*.mp4;*.avi;*.mkv;*.mov;*.wmv;*.flv;*.webm;*.mpg;*.mpeg;*.m4v;*.3gp;*.ts;*.mts;*.vob;*.asf;*.mp3;*.wav;*.ogg;*.flac;*.aac;*.m4a;*.wma;*.ape;*.opus;*.mka;*.m3u;*.m3u8;*.pls|Video Files|*.mp4;*.avi;*.mkv;*.mov;*.wmv;*.flv;*.webm;*.mpg;*.mpeg;*.m4v;*.3gp;*.ts;*.mts;*.vob;*.asf|Audio Files|*.mp3;*.wav;*.ogg;*.flac;*.aac;*.m4a;*.wma;*.ape;*.opus;*.mka|Playlists|*.m3u;*.m3u8;*.pls|All Files|*.*",
             Title = "Open Media File"
         };
 
@@ -196,15 +197,19 @@ public partial class MainWindow : Window
 
     private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
+        if (_mediaPlayerService == null) return;
         _mediaPlayerService.SetVolume((int)e.NewValue);
-        if (e.NewValue == 0)
+        if (MuteButton != null)
         {
-            MuteButton.Content = "🔇";
-        }
-        else
-        {
-            MuteButton.Content = "🔊";
-            _isMuted = false;
+            if (e.NewValue == 0)
+            {
+                MuteButton.Content = "🔇";
+            }
+            else
+            {
+                MuteButton.Content = "🔊";
+                _isMuted = false;
+            }
         }
     }
 
@@ -228,10 +233,14 @@ public partial class MainWindow : Window
 
     private void SpeedComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (SpeedComboBox.SelectedItem is ComboBoxItem item && item.Tag is float rate)
+        if (_mediaPlayerService == null) return;
+        if (SpeedComboBox?.SelectedItem is ComboBoxItem item && item.Tag is float rate)
         {
             _mediaPlayerService.SetRate(rate);
-            SpeedText.Text = $"{rate:F1}x";
+            if (SpeedText != null)
+            {
+                SpeedText.Text = $"{rate:F1}x";
+            }
         }
     }
 

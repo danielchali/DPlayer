@@ -47,6 +47,10 @@
             "LibVLCSharp.WPF": {
               "target": "Package",
               "version": "[3.10.0, )"
+            },
+            "VideoLAN.LibVLC.Windows": {
+              "target": "Package",
+              "version": "[3.0.23, )"
             }
           },
           "imports": [
@@ -69,6 +73,11 @@
             }
           },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.315/PortableRuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
         }
       }
     }

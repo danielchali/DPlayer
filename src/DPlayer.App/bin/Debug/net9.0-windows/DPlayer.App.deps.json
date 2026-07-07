@@ -8,7 +8,8 @@
     ".NETCoreApp,Version=v9.0": {
       "DPlayer.App/1.0.0": {
         "dependencies": {
-          "LibVLCSharp.WPF": "3.10.0"
+          "LibVLCSharp.WPF": "3.10.0",
+          "VideoLAN.LibVLC.Windows": "3.0.23"
         },
         "runtime": {
           "DPlayer.App.dll": {}
@@ -32,7 +33,8 @@
             "fileVersion": "3.10.0.0"
           }
         }
-      }
+      },
+      "VideoLAN.LibVLC.Windows/3.0.23": {}
     }
   },
   "libraries": {
@@ -54,6 +56,13 @@
       "sha512": "sha512-W7MFdY0QZBhATS3ZIMZSY1UYV6MqDxb+GibNzT3AzKNzDQX2Kzf27OZA5B0gA7fa2FYq79P7Jvlvdbbygis63g==",
       "path": "libvlcsharp.wpf/3.10.0",
       "hashPath": "libvlcsharp.wpf.3.10.0.nupkg.sha512"
+    },
+    "VideoLAN.LibVLC.Windows/3.0.23": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-O/Elo/AxXutSJ/3Z0lIuXEm9tr1iVmUYcws4WB1X9zHgGcAHBBFk29u9B7GX8mxLLMx9e1A6n3h6C0WyTk3KeQ==",
+      "path": "videolan.libvlc.windows/3.0.23",
+      "hashPath": "videolan.libvlc.windows.3.0.23.nupkg.sha512"
     }
   }
 }
