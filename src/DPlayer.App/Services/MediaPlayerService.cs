@@ -1,5 +1,6 @@
 using LibVLCSharp.Shared;
 using System;
+using System.IO;
 
 namespace DPlayer.App.Services;
 
@@ -8,6 +9,9 @@ public class MediaPlayerService : IDisposable
     private LibVLC? _libVLC;
     private MediaPlayer? _mediaPlayer;
     private Media? _media;
+    private readonly object _initLock = new object();
+    private readonly List<string> _playlist = new List<string>();
+    private int _currentIndex = -1;
 
     public event EventHandler? TimeChanged;
     public event EventHandler? LengthChanged;
@@ -15,19 +19,62 @@ public class MediaPlayerService : IDisposable
     public event EventHandler? EndReached;
 
     public bool IsInitialized => _libVLC != null;
+    public bool HasNext => _currentIndex >= 0 && _currentIndex < _playlist.Count - 1;
+    public bool HasPrevious => _currentIndex > 0 && _playlist.Count > 0;
+    public string? CurrentTrackPath => _currentIndex >= 0 && _currentIndex < _playlist.Count ? _playlist[_currentIndex] : null;
+
+    public void SetPlaylist(List<string> playlist, int startIndex)
+    {
+        _playlist.Clear();
+        _playlist.AddRange(playlist);
+        _currentIndex = (startIndex >= 0 && startIndex < _playlist.Count) ? startIndex : 0;
+    }
+
+    public void MoveNext()
+    {
+        if (HasNext)
+        {
+            _currentIndex++;
+        }
+    }
+
+    public void MovePrevious()
+    {
+        if (HasPrevious)
+        {
+            _currentIndex--;
+        }
+    }
 
     public void Initialize()
     {
-        if (_libVLC == null)
+        lock (_initLock)
         {
-            Core.Initialize();
-            _libVLC = new LibVLC(enableDebugLogs: false);
-            _mediaPlayer = new MediaPlayer(_libVLC);
-            
-            _mediaPlayer.TimeChanged += (s, e) => TimeChanged?.Invoke(s, e);
-            _mediaPlayer.LengthChanged += (s, e) => LengthChanged?.Invoke(s, e);
-            _mediaPlayer.Playing += (s, e) => PlayingChanged?.Invoke(s, e);
-            _mediaPlayer.EndReached += (s, e) => EndReached?.Invoke(s, e);
+            if (_libVLC == null)
+            {
+                string libVlcDirectory = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "libvlc",
+                    Environment.Is64BitProcess ? "win-x64" : "win-x86"
+                );
+
+                if (Directory.Exists(libVlcDirectory))
+                {
+                    Core.Initialize(libVlcDirectory);
+                }
+                else
+                {
+                    Core.Initialize();
+                }
+
+                _libVLC = new LibVLC(enableDebugLogs: false);
+                _mediaPlayer = new MediaPlayer(_libVLC);
+                
+                _mediaPlayer.TimeChanged += (s, e) => TimeChanged?.Invoke(s, e);
+                _mediaPlayer.LengthChanged += (s, e) => LengthChanged?.Invoke(s, e);
+                _mediaPlayer.Playing += (s, e) => PlayingChanged?.Invoke(s, e);
+                _mediaPlayer.EndReached += (s, e) => EndReached?.Invoke(s, e);
+            }
         }
     }
 

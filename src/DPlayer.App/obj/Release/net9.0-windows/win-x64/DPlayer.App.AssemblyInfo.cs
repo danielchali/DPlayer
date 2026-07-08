@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DPlayer.App")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4617400ea38c190cc3dc52322eb0a948a06267bb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd6ff077ce820c2bc97360f78eb0861607024599")]
 [assembly: System.Reflection.AssemblyProductAttribute("DPlayer.App")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DPlayer.App")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

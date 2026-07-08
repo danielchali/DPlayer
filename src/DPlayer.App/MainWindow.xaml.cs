@@ -1,5 +1,7 @@
 using Microsoft.Win32;
 using System;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -19,7 +21,6 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        Core.Initialize();
         _mediaPlayerService = new MediaPlayerService();
         InitializeComponent();
         
@@ -27,9 +28,9 @@ public partial class MainWindow : Window
         Closed += MainWindow_Closed;
     }
 
-    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        _mediaPlayerService.Initialize();
+        await Task.Run(() => _mediaPlayerService.Initialize());
         VideoView.MediaPlayer = _mediaPlayerService.GetMediaPlayer();
         
         _mediaPlayerService.TimeChanged += MediaPlayerService_TimeChanged;
@@ -234,8 +235,22 @@ public partial class MainWindow : Window
     private void SpeedComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_mediaPlayerService == null) return;
-        if (SpeedComboBox?.SelectedItem is ComboBoxItem item && item.Tag is float rate)
+        if (SpeedComboBox?.SelectedItem is ComboBoxItem item)
         {
+            float rate = 1.0f;
+            if (item.Tag is string rateStr && float.TryParse(rateStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float r1))
+            {
+                rate = r1;
+            }
+            else if (item.Tag is float r2)
+            {
+                rate = r2;
+            }
+            else if (item.Tag is double r3)
+            {
+                rate = (float)r3;
+            }
+
             _mediaPlayerService.SetRate(rate);
             if (SpeedText != null)
             {
@@ -271,5 +286,67 @@ public partial class MainWindow : Window
             return $"{hours:D2}:{(minutes % 60):D2}:{(seconds % 60):D2}";
         }
         return $"{minutes:D2}:{(seconds % 60):D2}";
+    }
+
+    [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+        try
+        {
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            int useImmersiveDarkMode = 1;
+            int attribute = 20; // DWMWA_USE_IMMERSIVE_DARK_MODE
+            
+            // Fallback for older Windows 10 versions (build < 18985)
+            if (Environment.OSVersion.Version.Major == 10 && Environment.OSVersion.Version.Build < 18985)
+            {
+                attribute = 19;
+            }
+            
+            DwmSetWindowAttribute(hwnd, attribute, ref useImmersiveDarkMode, sizeof(int));
+        }
+        catch { }
+    }
+
+    private void ContextMenuSpeed_Click(object sender, RoutedEventArgs e)
+    {
+        if (_mediaPlayerService == null) return;
+        if (sender is MenuItem item && item.Tag is string rateStr && float.TryParse(rateStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float rate))
+        {
+            _mediaPlayerService.SetRate(rate);
+            if (SpeedText != null)
+            {
+                SpeedText.Text = $"{rate:F1}x";
+            }
+            
+            // Sync selection in ComboBox
+            if (SpeedComboBox != null)
+            {
+                foreach (ComboBoxItem cbItem in SpeedComboBox.Items)
+                {
+                    if (cbItem.Tag is string tagStr && tagStr == rateStr)
+                    {
+                        SpeedComboBox.SelectedItem = cbItem;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void ContextMenuVolume_Click(object sender, RoutedEventArgs e)
+    {
+        if (_mediaPlayerService == null) return;
+        if (sender is MenuItem item && item.Tag is string volStr && int.TryParse(volStr, out int vol))
+        {
+            _mediaPlayerService.SetVolume(vol);
+            if (VolumeSlider != null)
+            {
+                VolumeSlider.Value = vol;
+            }
+        }
     }
 }
