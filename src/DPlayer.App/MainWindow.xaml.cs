@@ -23,7 +23,6 @@ public partial class MainWindow : Window
     private bool _isFullScreen;
     private readonly DispatcherTimer _fullScreenHideTimer;
     private bool _controlsVisible;
-    private bool _titleBarVisible;
     private string? _savedTitle;
     private static readonly string LastPlayedFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -183,6 +182,15 @@ public partial class MainWindow : Window
 
             _lastPlayedFile = path;
             SaveLastPlayedFile(path);
+
+            // If we are currently in fullscreen, move controls to the VideoOverlayGrid to bypass airspace
+            if (_isFullScreen && RootGrid.Children.Contains(PlaybackControls))
+            {
+                RootGrid.Children.Remove(PlaybackControls);
+                VideoOverlayGrid.Children.Add(PlaybackControls);
+                Grid.SetRow(PlaybackControls, 0);
+                PlaybackControls.VerticalAlignment = VerticalAlignment.Bottom;
+            }
         }
         catch (Exception ex)
         {
@@ -277,6 +285,25 @@ public partial class MainWindow : Window
         PlayPauseButton.Content = "▶";
         ProgressSlider.Value = 0;
         CurrentTimeText.Text = "00:00";
+
+        // Restore controls parenting if it was in the video overlay
+        if (VideoOverlayGrid.Children.Contains(PlaybackControls))
+        {
+            VideoOverlayGrid.Children.Remove(PlaybackControls);
+            RootGrid.Children.Add(PlaybackControls);
+            // If in fullscreen, it should remain overlaid at the bottom of the RootGrid
+            if (_isFullScreen)
+            {
+                Grid.SetRow(PlaybackControls, 0);
+                PlaybackControls.VerticalAlignment = VerticalAlignment.Bottom;
+            }
+            else
+            {
+                Grid.SetRow(PlaybackControls, 1);
+                PlaybackControls.VerticalAlignment = VerticalAlignment.Stretch;
+            }
+        }
+
         VideoView.Visibility = Visibility.Collapsed;
         NoMediaPanel.Visibility = Visibility.Visible;
         ProgressTimePanel.Visibility = Visibility.Collapsed;
@@ -376,25 +403,41 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ShowOverlayTitleBar()
+    {
+        OverlayTitleText.Text = Title;
+        TitleBarOverlay.Visibility = Visibility.Visible;
+    }
+
+    private void HideOverlayTitleBar()
+    {
+        TitleBarOverlay.Visibility = Visibility.Collapsed;
+    }
+
     private void EnterFullScreen()
     {
         _isFullScreen = true;
         _savedTitle = Title;
+
+        // Transition to true borderless fullscreen (done once, no further WindowStyle changes)
+        WindowState = WindowState.Normal;
         WindowStyle = WindowStyle.None;
         WindowState = WindowState.Maximized;
 
-        // Move controls into the video row so they overlay the video
+        if (VideoView.Visibility == Visibility.Visible)
+        {
+            RootGrid.Children.Remove(PlaybackControls);
+            VideoOverlayGrid.Children.Add(PlaybackControls);
+        }
+
         Grid.SetRow(PlaybackControls, 0);
         PlaybackControls.VerticalAlignment = VerticalAlignment.Bottom;
         ControlsRow.Height = new System.Windows.GridLength(0);
 
         PlaybackControls.Visibility = Visibility.Collapsed;
         ProgressTimePanel.Visibility = Visibility.Collapsed;
+        HideOverlayTitleBar();
         _controlsVisible = false;
-        _titleBarVisible = false;
-
-        // Show transparent overlay so mouse events fire over the native VLC window
-        MouseCaptureOverlay.Visibility = Visibility.Visible;
     }
 
     private void ExitFullScreen()
@@ -405,20 +448,23 @@ public partial class MainWindow : Window
         WindowStyle = WindowStyle.SingleBorderWindow;
         if (_savedTitle != null) Title = _savedTitle;
 
-        // Restore controls panel back to its own row
-        ControlsRow.Height = System.Windows.GridLength.Auto;
+        HideOverlayTitleBar();
+
+        if (VideoOverlayGrid.Children.Contains(PlaybackControls))
+        {
+            VideoOverlayGrid.Children.Remove(PlaybackControls);
+            RootGrid.Children.Add(PlaybackControls);
+        }
         Grid.SetRow(PlaybackControls, 1);
         PlaybackControls.VerticalAlignment = VerticalAlignment.Stretch;
-        MouseCaptureOverlay.Visibility = Visibility.Collapsed;
+        ControlsRow.Height = System.Windows.GridLength.Auto;
 
-        // Restore controls if media is loaded
         PlaybackControls.Visibility = Visibility.Visible;
         if (NoMediaPanel.Visibility != Visibility.Visible)
         {
             ProgressTimePanel.Visibility = Visibility.Visible;
         }
         _controlsVisible = false;
-        _titleBarVisible = false;
     }
 
     private void MainWindow_MouseMove(object sender, MouseEventArgs e)
@@ -428,12 +474,12 @@ public partial class MainWindow : Window
         var pos = e.GetPosition(this);
         var windowHeight = ActualHeight;
 
-        bool nearBottom = pos.Y >= windowHeight - EdgeThreshold;
-        bool nearTop = pos.Y <= EdgeThreshold;
+        bool nearEdge = pos.Y >= windowHeight - EdgeThreshold || pos.Y <= EdgeThreshold;
 
-        if (nearBottom)
+        if (nearEdge)
         {
-            // Show bottom controls
+            // Show both the custom title bar overlay and the bottom controls
+            ShowOverlayTitleBar();
             if (!_controlsVisible)
             {
                 PlaybackControls.Visibility = Visibility.Visible;
@@ -443,47 +489,18 @@ public partial class MainWindow : Window
                 }
                 _controlsVisible = true;
             }
-            // Hide title bar if it was showing
-            if (_titleBarVisible)
-            {
-                WindowStyle = WindowStyle.None;
-                _titleBarVisible = false;
-            }
-            _fullScreenHideTimer.Stop();
-            _fullScreenHideTimer.Start();
-        }
-        else if (nearTop)
-        {
-            // Show native title bar
-            if (!_titleBarVisible)
-            {
-                WindowStyle = WindowStyle.SingleBorderWindow;
-                WindowState = WindowState.Maximized;
-                _titleBarVisible = true;
-            }
-            // Hide bottom controls if they were showing
-            if (_controlsVisible)
-            {
-                PlaybackControls.Visibility = Visibility.Collapsed;
-                ProgressTimePanel.Visibility = Visibility.Collapsed;
-                _controlsVisible = false;
-            }
             _fullScreenHideTimer.Stop();
             _fullScreenHideTimer.Start();
         }
         else
         {
             // Middle area — hide everything
+            HideOverlayTitleBar();
             if (_controlsVisible)
             {
                 PlaybackControls.Visibility = Visibility.Collapsed;
                 ProgressTimePanel.Visibility = Visibility.Collapsed;
                 _controlsVisible = false;
-            }
-            if (_titleBarVisible)
-            {
-                WindowStyle = WindowStyle.None;
-                _titleBarVisible = false;
             }
             _fullScreenHideTimer.Stop();
         }
@@ -494,17 +511,28 @@ public partial class MainWindow : Window
         _fullScreenHideTimer.Stop();
         if (!_isFullScreen) return;
 
+        HideOverlayTitleBar();
         if (_controlsVisible)
         {
             PlaybackControls.Visibility = Visibility.Collapsed;
             ProgressTimePanel.Visibility = Visibility.Collapsed;
             _controlsVisible = false;
         }
-        if (_titleBarVisible)
-        {
-            WindowStyle = WindowStyle.None;
-            _titleBarVisible = false;
-        }
+    }
+
+    private void OverlayMinimize_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void OverlayRestore_Click(object sender, RoutedEventArgs e)
+    {
+        ExitFullScreen();
+    }
+
+    private void OverlayClose_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
     }
 
     private void MainWindow_KeyDown(object sender, KeyEventArgs e)
@@ -587,6 +615,75 @@ public partial class MainWindow : Window
             if (VolumeSlider != null)
             {
                 VolumeSlider.Value = vol;
+            }
+        }
+    }
+
+    private void PlayerContextMenu_Opened(object sender, RoutedEventArgs e)
+    {
+        // Repopulate subtitles from the current media player state
+        SubtitlesMenuItem.Items.Clear();
+
+        var noneItem = new MenuItem { Header = "None (Disabled)", Tag = "-1" };
+        noneItem.Click += ContextMenuSubtitle_Click;
+        SubtitlesMenuItem.Items.Add(noneItem);
+
+        var player = _mediaPlayerService.GetMediaPlayer();
+        if (player != null && player.IsPlaying)
+        {
+            var tracks = player.SpuDescription;
+            if (tracks != null)
+            {
+                foreach (var track in tracks)
+                {
+                    // Skip the built-in "Disable" entry (id == -1) since we already added "None"
+                    if (track.Id == -1) continue;
+
+                    var item = new MenuItem
+                    {
+                        Header = string.IsNullOrWhiteSpace(track.Name) ? $"Track {track.Id}" : track.Name,
+                        Tag = track.Id.ToString()
+                    };
+                    item.Click += ContextMenuSubtitle_Click;
+                    SubtitlesMenuItem.Items.Add(item);
+                }
+            }
+
+            // Option to load an external subtitle file
+            SubtitlesMenuItem.Items.Add(new Separator());
+            var loadItem = new MenuItem { Header = "Load Subtitle File..." };
+            loadItem.Click += LoadSubtitleFile_Click;
+            SubtitlesMenuItem.Items.Add(loadItem);
+        }
+
+        // Disable the menu if no tracks available
+        SubtitlesMenuItem.IsEnabled = player != null && player.IsPlaying;
+    }
+
+    private void ContextMenuSubtitle_Click(object sender, RoutedEventArgs e)
+    {
+        if (_mediaPlayerService == null) return;
+        if (sender is MenuItem item && item.Tag is string idStr && int.TryParse(idStr, out int id))
+        {
+            var player = _mediaPlayerService.GetMediaPlayer();
+            player?.SetSpu(id);
+        }
+    }
+
+    private void LoadSubtitleFile_Click(object sender, RoutedEventArgs e)
+    {
+        var openFileDialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Subtitle Files|*.srt;*.sub;*.ass;*.ssa;*.vtt;*.idx;*.smi|All Files|*.*",
+            Title = "Open Subtitle File"
+        };
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            var player = _mediaPlayerService.GetMediaPlayer();
+            if (player != null)
+            {
+                player.AddSlave(MediaSlaveType.Subtitle, new Uri(openFileDialog.FileName).AbsoluteUri, true);
             }
         }
     }
