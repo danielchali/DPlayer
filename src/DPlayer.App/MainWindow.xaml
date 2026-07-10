@@ -170,6 +170,90 @@
             <Setter Property="Background" Value="#444444"/>
             <Setter Property="Margin" Value="0,2"/>
         </Style>
+
+        <!-- Rounded Slider Style -->
+        <Style x:Key="RoundedSliderStyle" TargetType="Slider">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid Background="Transparent">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Track Background -->
+                            <Border x:Name="TrackBackground"
+                                    Grid.Row="1"
+                                    Height="6"
+                                    CornerRadius="3"
+                                    Background="#444444"
+                                    VerticalAlignment="Center"/>
+
+                            <!-- Active Track and Thumb -->
+                            <Track x:Name="PART_Track" Grid.Row="1">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.DecreaseLarge}">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border Height="6" CornerRadius="3,0,0,3" Background="#0078d4"/>
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.IncreaseLarge}">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border Height="6" Background="Transparent"/>
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb x:Name="Thumb" Width="12" Height="12" VerticalAlignment="Center">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse x:Name="ThumbEllipse" 
+                                                         Width="12" 
+                                                         Height="12" 
+                                                         Fill="White" 
+                                                         HorizontalAlignment="Center" 
+                                                         VerticalAlignment="Center">
+                                                    <Ellipse.Effect>
+                                                        <DropShadowEffect BlurRadius="4" Color="Black" Opacity="0.3" ShadowDepth="1"/>
+                                                    </Ellipse.Effect>
+                                                </Ellipse>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="ThumbEllipse" Property="Fill" Value="#e0e0e0"/>
+                                                        <Setter TargetName="ThumbEllipse" Property="Width" Value="14"/>
+                                                        <Setter TargetName="ThumbEllipse" Property="Height" Value="14"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsDragging" Value="True">
+                                                        <Setter TargetName="ThumbEllipse" Property="Fill" Value="#005a9e"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="TrackBackground" Property="Background" Value="#333333"/>
+                                <Setter TargetName="PART_Track" Property="IsEnabled" Value="False"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -327,6 +411,7 @@
                                Margin="0,0,10,0"/>
                     <Slider Grid.Column="1" 
                             x:Name="ProgressSlider" 
+                            Style="{StaticResource RoundedSliderStyle}"
                             Minimum="0" 
                             Maximum="100" 
                             Value="0"
@@ -376,6 +461,7 @@
                         FontSize="14"
                         Cursor="Hand"/>
                 <Slider x:Name="VolumeSlider" 
+                        Style="{StaticResource RoundedSliderStyle}"
                         Width="80" 
                         Minimum="0" 
                         Maximum="100" 
