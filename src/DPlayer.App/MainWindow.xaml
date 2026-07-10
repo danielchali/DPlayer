@@ -9,7 +9,8 @@
         Title="DPlayer" Height="600" Width="900"
         WindowStartupLocation="CenterScreen"
         Background="#1e1e1e"
-        Icon="Dplayer.ico">
+        Icon="Dplayer.ico"
+        PreviewMouseMove="MainWindow_MouseMove">
     <Window.Resources>
         <!-- Dark ContextMenu Style -->
         <Style TargetType="ContextMenu">
@@ -256,7 +257,7 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
+    <Grid x:Name="RootGrid">
         <Grid.ContextMenu>
             <ContextMenu x:Name="PlayerContextMenu">
                 <MenuItem Header="Open File..." Click="OpenFileButton_Click" />
@@ -287,23 +288,35 @@
         </Grid.ContextMenu>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition x:Name="ControlsRow" Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Video Player Area -->
         <Grid Grid.Row="0" Background="#000000">
-            <vlc:VideoView x:Name="VideoView" />
+            <vlc:VideoView x:Name="VideoView" Visibility="Collapsed" />
             <StackPanel x:Name="NoMediaPanel" 
                         VerticalAlignment="Center" 
                         HorizontalAlignment="Center"
                         Visibility="Visible">
+                <Image Source="Dplayerlogo.png" 
+                       Width="120" 
+                       Height="120" 
+                       Margin="0,0,0,15"
+                       HorizontalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                <TextBlock Text="DPlayer" 
+                           FontSize="32" 
+                           FontWeight="Bold"
+                           Foreground="White" 
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,5"/>
                 <TextBlock Text="No media loaded" 
-                           FontSize="24" 
+                           FontSize="14" 
                            Foreground="#888888" 
                            HorizontalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal" 
                             HorizontalAlignment="Center" 
-                            Margin="0,20,0,0">
+                            Margin="0,25,0,0">
                     <Button x:Name="OpenFileButton" 
                             Content="Open File" 
                             Width="120" 
@@ -336,10 +349,16 @@
                             Cursor="Hand"/>
                 </StackPanel>
             </StackPanel>
+
+            <!-- Transparent overlay to capture mouse events over the native VLC HwndHost -->
+            <Grid x:Name="MouseCaptureOverlay"
+                  Background="Transparent"
+                  MouseMove="MainWindow_MouseMove"
+                  Visibility="Collapsed" />
         </Grid>
 
-        <!-- Playback Controls -->
-        <Grid Grid.Row="1" Background="#2d2d2d">
+        <!-- Playback Controls (normal mode: Row 1; fullscreen: overlaid at bottom via VerticalAlignment) -->
+        <Grid x:Name="PlaybackControls" Grid.Row="1" Background="#2d2d2d">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -395,7 +414,7 @@
             </StackPanel>
 
             <!-- Progress Bar and Time -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0">
+            <StackPanel x:Name="ProgressTimePanel" Grid.Column="1" VerticalAlignment="Center" Margin="10,0" Visibility="Collapsed">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -416,7 +435,8 @@
                             Maximum="100" 
                             Value="0"
                             VerticalAlignment="Center"
-                            PreviewMouseLeftButtonUp="ProgressSlider_PreviewMouseLeftButtonUp"/>
+                            PreviewMouseLeftButtonUp="ProgressSlider_PreviewMouseLeftButtonUp"
+                            Visibility="Visible"/>
                     <TextBlock Grid.Column="2" 
                                x:Name="TotalTimeText" 
                                Text="00:00" 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using DPlayer.App.Services;
 using LibVLCSharp.Shared;
 
@@ -18,14 +19,37 @@ public partial class MainWindow : Window
     private readonly MediaPlayerService _mediaPlayerService;
     private bool _isMuted;
     private bool _isUpdatingProgress;
+    private string? _lastPlayedFile;
+    private bool _isFullScreen;
+    private readonly DispatcherTimer _fullScreenHideTimer;
+    private bool _controlsVisible;
+    private bool _titleBarVisible;
+    private string? _savedTitle;
+    private static readonly string LastPlayedFilePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "DPlayer",
+        "last_played.txt"
+    );
+
+    // Threshold in pixels from edge to trigger reveal
+    private const double EdgeThreshold = 60;
 
     public MainWindow()
     {
         _mediaPlayerService = new MediaPlayerService();
         InitializeComponent();
+        Title = "DPlayer - No media loaded";
+
+        _fullScreenHideTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(3)
+        };
+        _fullScreenHideTimer.Tick += FullScreenHideTimer_Tick;
         
         Loaded += MainWindow_Loaded;
         Closed += MainWindow_Closed;
+        KeyDown += MainWindow_KeyDown;
+        MouseMove += MainWindow_MouseMove; // catches moves outside the VLC area
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -37,6 +61,8 @@ public partial class MainWindow : Window
         _mediaPlayerService.LengthChanged += MediaPlayerService_LengthChanged;
         _mediaPlayerService.PlayingChanged += MediaPlayerService_PlayingChanged;
         _mediaPlayerService.EndReached += MediaPlayerService_EndReached;
+
+        _lastPlayedFile = LoadLastPlayedFile();
     }
 
     private void MainWindow_Closed(object? sender, EventArgs e)
@@ -150,7 +176,13 @@ public partial class MainWindow : Window
         {
             _mediaPlayerService.LoadMedia(path);
             NoMediaPanel.Visibility = Visibility.Collapsed;
+            VideoView.Visibility = Visibility.Visible;
+            ProgressTimePanel.Visibility = Visibility.Visible;
+            Title = $"{GetMediaDisplayName(path)} - DPlayer";
             _mediaPlayerService.Play();
+
+            _lastPlayedFile = path;
+            SaveLastPlayedFile(path);
         }
         catch (Exception ex)
         {
@@ -158,8 +190,77 @@ public partial class MainWindow : Window
         }
     }
 
+    private string GetMediaDisplayName(string path)
+    {
+        if (Uri.TryCreate(path, UriKind.Absolute, out var uri) && 
+            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+        {
+            return Uri.UnescapeDataString(uri.Segments.LastOrDefault() ?? path);
+        }
+        try
+        {
+            return Path.GetFileName(path);
+        }
+        catch
+        {
+            return path;
+        }
+    }
+
+    private void SaveLastPlayedFile(string path)
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(LastPlayedFilePath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            File.WriteAllText(LastPlayedFilePath, path);
+        }
+        catch { }
+    }
+
+    private string? LoadLastPlayedFile()
+    {
+        try
+        {
+            if (File.Exists(LastPlayedFilePath))
+            {
+                return File.ReadAllText(LastPlayedFilePath);
+            }
+        }
+        catch { }
+        return null;
+    }
+
+    private bool IsValidMediaSource(string? path)
+    {
+        if (string.IsNullOrEmpty(path)) return false;
+        if (Uri.TryCreate(path, UriKind.Absolute, out var uri) && 
+            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps || 
+             uri.Scheme == "rtsp" || uri.Scheme == "rtmp" || uri.Scheme == "ftp"))
+        {
+            return true;
+        }
+        return File.Exists(path);
+    }
+
     private void PlayPauseButton_Click(object sender, RoutedEventArgs e)
     {
+        if (NoMediaPanel.Visibility == Visibility.Visible)
+        {
+            if (IsValidMediaSource(_lastPlayedFile))
+            {
+                LoadMedia(_lastPlayedFile!);
+            }
+            else
+            {
+                OpenFileButton_Click(sender, e);
+            }
+            return;
+        }
+
         if (_mediaPlayerService.IsPlaying())
         {
             _mediaPlayerService.Pause();
@@ -176,6 +277,10 @@ public partial class MainWindow : Window
         PlayPauseButton.Content = "▶";
         ProgressSlider.Value = 0;
         CurrentTimeText.Text = "00:00";
+        VideoView.Visibility = Visibility.Collapsed;
+        NoMediaPanel.Visibility = Visibility.Visible;
+        ProgressTimePanel.Visibility = Visibility.Collapsed;
+        Title = "DPlayer - No media loaded";
     }
 
     private void PreviousButton_Click(object sender, RoutedEventArgs e)
@@ -261,17 +366,153 @@ public partial class MainWindow : Window
 
     private void FullScreenButton_Click(object sender, RoutedEventArgs e)
     {
-        if (WindowState == WindowState.Normal)
+        if (!_isFullScreen)
         {
-            WindowState = WindowState.Maximized;
-            WindowStyle = WindowStyle.None;
-            FullScreenButton.Content = "⛶";
+            EnterFullScreen();
         }
         else
         {
-            WindowState = WindowState.Normal;
-            WindowStyle = WindowStyle.SingleBorderWindow;
-            FullScreenButton.Content = "⛶";
+            ExitFullScreen();
+        }
+    }
+
+    private void EnterFullScreen()
+    {
+        _isFullScreen = true;
+        _savedTitle = Title;
+        WindowStyle = WindowStyle.None;
+        WindowState = WindowState.Maximized;
+
+        // Move controls into the video row so they overlay the video
+        Grid.SetRow(PlaybackControls, 0);
+        PlaybackControls.VerticalAlignment = VerticalAlignment.Bottom;
+        ControlsRow.Height = new System.Windows.GridLength(0);
+
+        PlaybackControls.Visibility = Visibility.Collapsed;
+        ProgressTimePanel.Visibility = Visibility.Collapsed;
+        _controlsVisible = false;
+        _titleBarVisible = false;
+
+        // Show transparent overlay so mouse events fire over the native VLC window
+        MouseCaptureOverlay.Visibility = Visibility.Visible;
+    }
+
+    private void ExitFullScreen()
+    {
+        _fullScreenHideTimer.Stop();
+        _isFullScreen = false;
+        WindowState = WindowState.Normal;
+        WindowStyle = WindowStyle.SingleBorderWindow;
+        if (_savedTitle != null) Title = _savedTitle;
+
+        // Restore controls panel back to its own row
+        ControlsRow.Height = System.Windows.GridLength.Auto;
+        Grid.SetRow(PlaybackControls, 1);
+        PlaybackControls.VerticalAlignment = VerticalAlignment.Stretch;
+        MouseCaptureOverlay.Visibility = Visibility.Collapsed;
+
+        // Restore controls if media is loaded
+        PlaybackControls.Visibility = Visibility.Visible;
+        if (NoMediaPanel.Visibility != Visibility.Visible)
+        {
+            ProgressTimePanel.Visibility = Visibility.Visible;
+        }
+        _controlsVisible = false;
+        _titleBarVisible = false;
+    }
+
+    private void MainWindow_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_isFullScreen) return;
+
+        var pos = e.GetPosition(this);
+        var windowHeight = ActualHeight;
+
+        bool nearBottom = pos.Y >= windowHeight - EdgeThreshold;
+        bool nearTop = pos.Y <= EdgeThreshold;
+
+        if (nearBottom)
+        {
+            // Show bottom controls
+            if (!_controlsVisible)
+            {
+                PlaybackControls.Visibility = Visibility.Visible;
+                if (NoMediaPanel.Visibility != Visibility.Visible)
+                {
+                    ProgressTimePanel.Visibility = Visibility.Visible;
+                }
+                _controlsVisible = true;
+            }
+            // Hide title bar if it was showing
+            if (_titleBarVisible)
+            {
+                WindowStyle = WindowStyle.None;
+                _titleBarVisible = false;
+            }
+            _fullScreenHideTimer.Stop();
+            _fullScreenHideTimer.Start();
+        }
+        else if (nearTop)
+        {
+            // Show native title bar
+            if (!_titleBarVisible)
+            {
+                WindowStyle = WindowStyle.SingleBorderWindow;
+                WindowState = WindowState.Maximized;
+                _titleBarVisible = true;
+            }
+            // Hide bottom controls if they were showing
+            if (_controlsVisible)
+            {
+                PlaybackControls.Visibility = Visibility.Collapsed;
+                ProgressTimePanel.Visibility = Visibility.Collapsed;
+                _controlsVisible = false;
+            }
+            _fullScreenHideTimer.Stop();
+            _fullScreenHideTimer.Start();
+        }
+        else
+        {
+            // Middle area — hide everything
+            if (_controlsVisible)
+            {
+                PlaybackControls.Visibility = Visibility.Collapsed;
+                ProgressTimePanel.Visibility = Visibility.Collapsed;
+                _controlsVisible = false;
+            }
+            if (_titleBarVisible)
+            {
+                WindowStyle = WindowStyle.None;
+                _titleBarVisible = false;
+            }
+            _fullScreenHideTimer.Stop();
+        }
+    }
+
+    private void FullScreenHideTimer_Tick(object? sender, EventArgs e)
+    {
+        _fullScreenHideTimer.Stop();
+        if (!_isFullScreen) return;
+
+        if (_controlsVisible)
+        {
+            PlaybackControls.Visibility = Visibility.Collapsed;
+            ProgressTimePanel.Visibility = Visibility.Collapsed;
+            _controlsVisible = false;
+        }
+        if (_titleBarVisible)
+        {
+            WindowStyle = WindowStyle.None;
+            _titleBarVisible = false;
+        }
+    }
+
+    private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape && _isFullScreen)
+        {
+            ExitFullScreen();
+            e.Handled = true;
         }
     }
 

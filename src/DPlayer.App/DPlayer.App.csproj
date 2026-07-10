@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Resource Include="..\..\Assets\Dplayer.ico" Link="Dplayer.ico" />
+    <Resource Include="..\..\Assets\Dplayerlogo.png" Link="Dplayerlogo.png" />
   </ItemGroup>
 
 </Project>
