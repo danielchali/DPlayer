@@ -3,7 +3,7 @@
 
 #define MyAppName "DPlayer"
 #define MyAppVersion "1.0.0"
-#define MyAppPublisher "Daniel"
+#define MyAppPublisher "Dredlabs"
 #define MyAppExeName "DPlayer.App.exe"
 #define MyAppIconName "Dplayer.ico"
 
